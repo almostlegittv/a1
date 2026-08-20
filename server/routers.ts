@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { z } from "zod";
-import { createBookingRequest, createCreatorApplication, createCreatorOnboarding, findActiveRequest, getCreatorApplicationForUser, getStreamerProfileBySlug, listAdminCreatorProfiles, listCreatorApplicationsForAdmin, listApprovedCatalog, listCreatorRequests, listPublicRequests, listUsersForAdminOnboarding, reviewCreatorApplication, setCatalogOwnership, setCreatorApproval, updateRequestStatus } from "./db";
+import { createBookingRequest, createCreatorApplication, createCreatorOnboarding, findActiveRequest, getCreatorApplicationForUser, getStreamerProfileBySlug, listAdminCreatorProfiles, listCreatorApplicationChecks, listCreatorApplicationEvents, listCreatorApplicationsForAdmin, listApprovedCatalog, listCreatorRequests, listPublicRequests, listUsersForAdminOnboarding, reviewCreatorApplication, setCatalogOwnership, setCreatorApproval, updateCreatorApplicationCheck, updateRequestStatus } from "./db";
 
 export type AppUser = { id: number; role: "user" | "admin"; streamerProfileId?: number } | null;
 export type AppContext = { user: AppUser };
@@ -41,6 +41,9 @@ export const appRouter = t.router({
   admin: t.router({
     users: adminProcedure.query(() => listUsersForAdminOnboarding()),
     applications: adminProcedure.query(() => listCreatorApplicationsForAdmin()),
+    applicationChecks: adminProcedure.input(z.object({ applicationId: z.number().int().positive() })).query(({ input }) => listCreatorApplicationChecks(input.applicationId)),
+    applicationEvents: adminProcedure.input(z.object({ applicationId: z.number().int().positive() })).query(({ input }) => listCreatorApplicationEvents(input.applicationId)),
+    updateApplicationCheck: adminProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(["unreviewed", "verified", "failed", "not_applicable"]), reviewerNote: z.string().trim().max(2000).optional() })).mutation(({ ctx, input }) => updateCreatorApplicationCheck({ ...input, reviewerUserId: ctx.user!.id })),
     reviewApplication: adminProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(["in_review", "needs_changes", "approved", "rejected"]), reviewerNotes: z.string().trim().max(2000).optional() })).mutation(({ ctx, input }) => reviewCreatorApplication({ ...input, reviewerUserId: ctx.user!.id })),
     creators: adminProcedure.query(() => listAdminCreatorProfiles()),
     createCreator: adminProcedure.input(z.object({

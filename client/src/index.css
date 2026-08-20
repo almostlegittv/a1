@@ -489,3 +489,14 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .application-review-actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 1rem; }
 .application-review-actions .signal-button { border-color: var(--signal); }
 @media (max-width: 720px) { .application-row, .application-game-row, .application-review-grid { grid-template-columns: 1fr; } .application-row__platform { max-width: none; } .application-review-card__header { flex-direction: column; } .application-review-actions > * { flex: 1 1 100%; justify-content: center; } }
+
+.application-checks { margin-top: 1rem; padding: 1rem; border: 1px solid rgba(244,243,235,.12); background: rgba(16,17,15,.72); }
+.application-check-row { display: grid; grid-template-columns: 1fr 160px; gap: .8rem; align-items: center; padding: .7rem 0; border-top: 1px solid rgba(244,243,235,.08); }
+.application-check-row > div { display: grid; gap: .2rem; }
+.application-check-row strong { color: var(--bone); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; }
+.application-check-row span { color: #c2c6bb; font-size: .8rem; }
+.application-check-row a { display: inline-flex; align-items: center; gap: .3rem; width: fit-content; color: var(--signal); font-size: .72rem; }
+.application-history { margin-top: 1rem; border-top: 1px solid rgba(244,243,235,.12); border-bottom: 1px solid rgba(244,243,235,.12); padding: .8rem 0; color: #bfc3b9; font-size: .78rem; }
+.application-history summary { cursor: pointer; color: var(--bone); font-weight: 700; }
+.application-history p { margin: .65rem 0 0; padding-left: .8rem; border-left: 2px solid rgba(184,255,44,.45); }
+@media (max-width: 720px) { .application-check-row { grid-template-columns: 1fr; } }

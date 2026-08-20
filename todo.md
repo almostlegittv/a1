@@ -148,3 +148,11 @@
 - [x] Add private admin review procedures and a verification queue with approve, reject, and needs-changes states.
 - [x] Ensure applicants cannot self-publish and unapproved applications never appear as public creator portfolios.
 - [x] Add tests for application validation, admin authorization, review transitions, and no-funds boundaries.
+
+- [ ] Review launch-critical product gaps beyond creator applications and booking.
+- [ ] Define monetization options that do not process viewer payments, wallet funds, gift codes, or platform transactions.
+- [ ] Prioritize a staged launch roadmap with measurable validation milestones.
+
+- [x] Document the creator-application schema, verification states, audit history, and public-profile boundary.
+- [x] Refine the admin review panel around verification evidence, reviewer notes, status transitions, and approval safeguards.
+- [x] Add or update tests for review authorization, auditability, public visibility, and no-funds boundaries.

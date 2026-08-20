@@ -15,8 +15,10 @@ describe("creator application contracts", () => {
     })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 
-  it("keeps the admin application queue restricted to admins", async () => {
+  it("keeps the admin application queue, checks, and history restricted to admins", async () => {
     await expect(caller({ id: 3, role: "user" }).admin.applications()).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(caller({ id: 3, role: "user" }).admin.applicationChecks({ applicationId: 1 })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(caller({ id: 3, role: "user" }).admin.applicationEvents({ applicationId: 1 })).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
   it("rejects malformed public slugs and empty catalog submissions", async () => {
@@ -29,9 +31,10 @@ describe("creator application contracts", () => {
     })).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
-  it("does not introduce funds, payment, wallet, or gift-code application fields", () => {
+  it("keeps verification data separate from funds and transaction data", () => {
     const schema = readFileSync(new URL("../drizzle/schema.ts", import.meta.url), "utf8").toLowerCase();
-    const applicationSection = schema.slice(schema.indexOf("creatorapplications"), schema.indexOf("export const bookingrequests"));
-    expect(applicationSection).not.toMatch(/payment|wallet|gift.?code|service.?fee|funds/);
+    const reviewSection = schema.slice(schema.indexOf("creatorapplications"), schema.indexOf("export const bookingrequests"));
+    expect(reviewSection).toMatch(/creatorapplicationchecks|creatorapplicationevents/);
+    expect(reviewSection).not.toMatch(/payment|wallet|gift.?code|service.?fee|funds/);
   });
 });

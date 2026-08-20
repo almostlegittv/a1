@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
-import { bookingRequests, catalogGames, creatorApplications, streamerCatalog, streamerProfiles, users } from "../drizzle/schema";
+import { bookingRequests, catalogGames, creatorApplicationChecks, creatorApplicationEvents, creatorApplications, streamerCatalog, streamerProfiles, users } from "../drizzle/schema";
 
 const pool = process.env.DATABASE_URL ? mysql.createPool(process.env.DATABASE_URL) : null;
 export const db = pool ? drizzle(pool) : null;
@@ -235,6 +235,8 @@ export async function createCreatorApplication(input: CreatorApplicationInput) {
   if (slugTaken[0]) throw new Error("That public creator slug is already in use.");
   if (existing) {
     await db.update(creatorApplications).set({ displayName: input.displayName, requestedSlug: input.requestedSlug, bio: input.bio || null, gamerTags: JSON.stringify(input.gamerTags), streamLinks: JSON.stringify(input.streamLinks), catalogDraft: JSON.stringify(input.catalog), status: "pending", reviewerNotes: null, reviewedByUserId: null }).where(eq(creatorApplications.id, existing.id));
+    await db.delete(creatorApplicationChecks).where(eq(creatorApplicationChecks.applicationId, existing.id));
+    await db.insert(creatorApplicationEvents).values({ applicationId: existing.id, actorUserId: input.applicantUserId, fromStatus: existing.status, toStatus: "pending", note: "Applicant resubmitted after requested changes." });
     return (await db.select().from(creatorApplications).where(eq(creatorApplications.id, existing.id)).limit(1))[0];
   }
   const applicationResult = await db.insert(creatorApplications).values({
@@ -247,12 +249,37 @@ export async function createCreatorApplication(input: CreatorApplicationInput) {
     catalogDraft: JSON.stringify(input.catalog),
     status: "pending",
   });
-  return (await db.select().from(creatorApplications).where(eq(creatorApplications.id, Number(applicationResult[0].insertId))).limit(1))[0];
+  const applicationId = Number(applicationResult[0].insertId);
+  await db.insert(creatorApplicationChecks).values([
+    { applicationId, checkType: "identity", subject: input.displayName },
+    ...input.gamerTags.map((tag) => ({ applicationId, checkType: "gamer_tag" as const, subject: `${tag.platform}: ${tag.handle}` })),
+    ...input.streamLinks.map((link) => ({ applicationId, checkType: "stream_profile" as const, subject: link.platform, evidenceUrl: link.url })),
+    { applicationId, checkType: "catalog", subject: `${input.catalog.length} submitted catalog entries` },
+    { applicationId, checkType: "policy", subject: "No-funds and platform-boundary acknowledgement" },
+  ]);
+  await db.insert(creatorApplicationEvents).values({ applicationId, actorUserId: input.applicantUserId, toStatus: "pending", note: "Application submitted." });
+  return (await db.select().from(creatorApplications).where(eq(creatorApplications.id, applicationId)).limit(1))[0];
 }
 
 export async function getCreatorApplicationForUser(applicantUserId: number) {
   if (!db) return undefined;
   return (await db.select().from(creatorApplications).where(eq(creatorApplications.applicantUserId, applicantUserId)).orderBy(desc(creatorApplications.createdAt)).limit(1))[0];
+}
+
+export async function listCreatorApplicationChecks(applicationId: number) {
+  if (!db) return [];
+  return db.select().from(creatorApplicationChecks).where(eq(creatorApplicationChecks.applicationId, applicationId)).orderBy(asc(creatorApplicationChecks.createdAt));
+}
+
+export async function listCreatorApplicationEvents(applicationId: number) {
+  if (!db) return [];
+  return db.select({ id: creatorApplicationEvents.id, actorUserId: creatorApplicationEvents.actorUserId, fromStatus: creatorApplicationEvents.fromStatus, toStatus: creatorApplicationEvents.toStatus, note: creatorApplicationEvents.note, createdAt: creatorApplicationEvents.createdAt, actorName: users.name }).from(creatorApplicationEvents).innerJoin(users, eq(creatorApplicationEvents.actorUserId, users.id)).where(eq(creatorApplicationEvents.applicationId, applicationId)).orderBy(desc(creatorApplicationEvents.createdAt));
+}
+
+export async function updateCreatorApplicationCheck(input: { id: number; reviewerUserId: number; status: "unreviewed" | "verified" | "failed" | "not_applicable"; reviewerNote?: string }) {
+  if (!db) throw new Error("Database is not configured");
+  await db.update(creatorApplicationChecks).set({ status: input.status, reviewerNote: input.reviewerNote || null, reviewedByUserId: input.reviewerUserId, reviewedAt: new Date() }).where(eq(creatorApplicationChecks.id, input.id));
+  return (await db.select().from(creatorApplicationChecks).where(eq(creatorApplicationChecks.id, input.id)).limit(1))[0];
 }
 
 export async function listCreatorApplicationsForAdmin() {
@@ -281,6 +308,7 @@ export async function reviewCreatorApplication(input: { id: number; reviewerUser
   if (!application) throw new Error("Creator application not found.");
   if (input.status !== "approved") {
     await db.update(creatorApplications).set({ status: input.status, reviewerNotes: input.reviewerNotes || null, reviewedByUserId: input.reviewerUserId }).where(eq(creatorApplications.id, input.id));
+    await db.insert(creatorApplicationEvents).values({ applicationId: input.id, actorUserId: input.reviewerUserId, fromStatus: application.status, toStatus: input.status, note: input.reviewerNotes || null });
     return (await db.select().from(creatorApplications).where(eq(creatorApplications.id, input.id)).limit(1))[0];
   }
   const existingSlug = await db.select({ id: streamerProfiles.id }).from(streamerProfiles).where(eq(streamerProfiles.slug, application.requestedSlug)).limit(1);
@@ -288,7 +316,7 @@ export async function reviewCreatorApplication(input: { id: number; reviewerUser
   let catalog: Array<{ title: string; platform: "xbox" | "playstation"; genre?: string; note?: string }> = [];
   try { catalog = JSON.parse(application.catalogDraft) as typeof catalog; } catch { throw new Error("The application catalog is invalid."); }
   return db.transaction(async (tx) => {
-    const profileResult = await tx.insert(streamerProfiles).values({ ownerUserId: application.applicantUserId, slug: application.requestedSlug, displayName: application.displayName, bio: application.bio, approvalStatus: "approved" });
+    const profileResult = await tx.insert(streamerProfiles).values({ ownerUserId: application.applicantUserId, slug: application.requestedSlug, displayName: application.displayName, bio: application.bio, gamerTags: application.gamerTags, streamLinks: application.streamLinks, verifiedAt: new Date(), verifiedByUserId: input.reviewerUserId, approvalStatus: "approved" });
     const profileId = Number(profileResult[0].insertId);
     for (const entry of catalog) {
       const existingGame = await tx.select().from(catalogGames).where(and(eq(catalogGames.title, entry.title), eq(catalogGames.platform, entry.platform))).limit(1);
@@ -296,6 +324,8 @@ export async function reviewCreatorApplication(input: { id: number; reviewerUser
       if (game) await tx.insert(streamerCatalog).values({ streamerProfileId: profileId, gameId: game.id, ownershipStatus: "unconfirmed", isVisible: true });
     }
     await tx.update(creatorApplications).set({ status: "approved", reviewerNotes: input.reviewerNotes || null, reviewedByUserId: input.reviewerUserId }).where(eq(creatorApplications.id, input.id));
+    await tx.update(creatorApplicationChecks).set({ status: "verified", reviewedByUserId: input.reviewerUserId, reviewedAt: new Date() }).where(eq(creatorApplicationChecks.applicationId, input.id));
+    await tx.insert(creatorApplicationEvents).values({ applicationId: input.id, actorUserId: input.reviewerUserId, fromStatus: application.status, toStatus: "approved", note: input.reviewerNotes || "Application approved and public profile created." });
     return (await tx.select().from(creatorApplications).where(eq(creatorApplications.id, input.id)).limit(1))[0];
   });
 }
