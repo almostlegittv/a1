@@ -156,3 +156,7 @@
 - [x] Document the creator-application schema, verification states, audit history, and public-profile boundary.
 - [x] Refine the admin review panel around verification evidence, reviewer notes, status transitions, and approval safeguards.
 - [x] Add or update tests for review authorization, auditability, public visibility, and no-funds boundaries.
+
+- [x] Refine the creator profile application form information architecture and field guidance.
+- [x] Improve client-side validation, dynamic rows, submission states, and status feedback.
+- [x] Verify authentication gating, responsive layout, privacy wording, and no-funds disclosure for the form workflow.

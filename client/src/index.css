@@ -500,3 +500,20 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .application-history summary { cursor: pointer; color: var(--bone); font-weight: 700; }
 .application-history p { margin: .65rem 0 0; padding-left: .8rem; border-left: 2px solid rgba(184,255,44,.45); }
 @media (max-width: 720px) { .application-check-row { grid-template-columns: 1fr; } }
+
+.application-progress { height: 4px; margin: 1.2rem 0 1.7rem; background: rgba(244,243,235,.12); overflow: hidden; }
+.application-progress span { display: block; height: 100%; background: var(--signal); transition: width 180ms var(--ease-out); }
+.application-intro { display: flex; align-items: flex-start; gap: .55rem; margin: 0 0 1.3rem; color: #bfc3b9; font-size: .82rem; line-height: 1.5; }
+.application-intro svg { flex: none; margin-top: .1rem; color: var(--signal); }
+.application-step { padding: 1.25rem 0 1.5rem; border-top: 1px solid rgba(244,243,235,.12); }
+.application-step__heading { display: flex; gap: .85rem; align-items: flex-start; margin-bottom: .9rem; }
+.application-step__heading > span { color: var(--signal); font-family: "Space Grotesk", sans-serif; font-size: .7rem; font-weight: 700; letter-spacing: .12em; }
+.application-step__heading h3 { margin: 0; color: var(--bone); font-family: "Space Grotesk", sans-serif; font-size: 1.15rem; letter-spacing: -.04em; }
+.application-step__heading p { margin: .3rem 0 0; color: #9ea398; font-size: .78rem; line-height: 1.45; }
+.form-error { display: block; margin-top: .35rem; color: #ff9b80; font-size: .72rem; line-height: 1.35; }
+input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: #ff8652; box-shadow: 0 0 0 1px rgba(255,134,82,.2); }
+.application-submit-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.4rem; }
+.application-submit-row .field-hint { max-width: 340px; }
+.booking-notice--error { border-left-color: #ff8652; }
+.booking-notice--error svg { color: #ff8652; }
+@media (max-width: 720px) { .application-submit-row { align-items: stretch; flex-direction: column; } .application-submit-row .signal-button { width: 100%; } }
