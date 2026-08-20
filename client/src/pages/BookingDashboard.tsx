@@ -127,7 +127,7 @@ export default function BookingDashboard() {
   };
 
   return (
-    <main className="booking-page" data-platform={mode}>
+    <main className="booking-page" data-platform={mode}><div className="booking-page__background" aria-hidden="true"><span>LIVE CONTROL ROOM / REQUEST BOARD</span></div>
       <header className="booking-header">
         <div>
           <p className="eyebrow"><span /> REQUEST A STREAM / CREATOR BOARD</p>
@@ -168,7 +168,7 @@ export default function BookingDashboard() {
             {profile.isLoading || catalogQuery.isLoading ? <p className="booking-empty-state">Loading the approved creator catalog…</p> : !profile.data ? <p className="booking-empty-state">This creator profile is unavailable or not approved yet. Try another creator link.</p> : visibleGames.length === 0 ? <p className="booking-empty-state">The approved creator catalog is being prepared. No request can be submitted until a game is published.</p> : visibleGames.map((game) => {
               const request = activeRequestFor(game.id);
               const quickRequestAction = getQuickRequestAction(game.status, Boolean(request));
-              return <article key={game.id} className={`booking-game-card booking-game-card--${game.platform} ${game.status === "owned" ? "booking-game-card--owned" : ""}`}>
+              return <article key={game.id} className={`booking-game-card booking-game-card--${game.platform} booking-game-card--story-${storyDrivenRank(game.title) + 1} ${game.status === "owned" ? "booking-game-card--owned" : ""}`}>
                 <div className="booking-game-card__top"><span className="platform-chip">{platformLabel(game.platform)}</span><span>{storyDrivenPriority.includes(game.title) ? "STORY PICK" : "CATALOG"}</span></div>
                 <div className="booking-game-card__art"><Gamepad2 size={30} /><span>{game.genre}</span>{game.status === "owned" && <strong>ALREADY OWNED</strong>}</div>
                 <div className="booking-game-card__body"><h3>{game.title}</h3><p>{game.note}</p>

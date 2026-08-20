@@ -168,3 +168,7 @@
 - [x] Define safe structural validation for public stream URLs and Xbox/PlayStation gamer tags.
 - [x] Show automated validation results in creator submission and admin review interfaces without claiming account ownership.
 - [x] Add tests for valid, invalid, unsupported, and no-credential validation cases.
+
+- [x] Restore richer imagery and story-driven visual anchors on the request-first landing experience.
+- [x] Increase useful first-viewport content density without weakening the primary request action.
+- [x] Verify artwork loading, desktop/mobile balance, accessibility, and visual consistency with the Signal Raid system.
