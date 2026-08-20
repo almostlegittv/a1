@@ -32,8 +32,10 @@ export async function ensureOwnerProfile(userId: number, displayName: string) {
   const profile = existing[0] ?? (await db.insert(streamerProfiles).values({ ownerUserId: userId, slug: "almostlegittv", displayName: displayName || "AlmostLegitTV", approvalStatus: "approved" }).then(async (result) => (await db.select().from(streamerProfiles).where(eq(streamerProfiles.id, Number(result[0].insertId))).limit(1))[0]));
   if (!profile) throw new Error("Unable to create owner profile");
   const seedGames = [
-    { title: "Red Dead Redemption 2", platform: "xbox" as const, genre: "Open-world western", note: "Already in rotation." },
-    { title: "S.T.A.L.K.E.R. 2", platform: "xbox" as const, genre: "Survival FPS", note: "A high-pressure run." },
+    { title: "Red Dead Redemption 2", platform: "xbox" as const, genre: "Story-driven western", note: "A long-form frontier story with room for chat to shape the journey." },
+    { title: "Kingdom Come: Deliverance II", platform: "xbox" as const, genre: "Story-driven RPG", note: "A grounded medieval journey where choices shape the road ahead." },
+    { title: "Grand Theft Auto V", platform: "xbox" as const, genre: "Open-world action", note: "A character-driven crime saga with room for chat to steer the chaos." },
+    { title: "S.T.A.L.K.E.R. 2", platform: "xbox" as const, genre: "Story-driven survival FPS", note: "A tense journey through the Zone where every decision carries weight." },
     { title: "Elden Ring", platform: "xbox" as const, genre: "Action RPG", note: "Big bosses, bigger maps." },
     { title: "Returnal", platform: "playstation" as const, genre: "Roguelike shooter", note: "A high-pressure PlayStation run." },
     { title: "Ghost of Tsushima", platform: "playstation" as const, genre: "Action adventure", note: "Timing can be coordinated off-platform." },
@@ -143,4 +145,74 @@ export async function setCatalogOwnership(id: number, ownershipStatus: "unconfir
   await db.update(streamerCatalog).set({ ownershipStatus }).where(eq(streamerCatalog.id, id));
   const rows = await db.select().from(streamerCatalog).where(eq(streamerCatalog.id, id)).limit(1);
   return rows[0];
+}
+
+export async function listUsersForAdminOnboarding() {
+  if (!db) return [];
+  return db
+    .select({ id: users.id, name: users.name, email: users.email, role: users.role })
+    .from(users)
+    .orderBy(asc(users.name), asc(users.email));
+}
+
+export type CreatorOnboardingInput = {
+  ownerUserId: number;
+  slug: string;
+  displayName: string;
+  bio?: string;
+  publicTipUrl?: string;
+  approvalStatus: "pending" | "approved";
+  catalog: Array<{
+    title: string;
+    platform: "xbox" | "playstation";
+    genre?: string;
+    note?: string;
+  }>;
+};
+
+export async function createCreatorOnboarding(input: CreatorOnboardingInput) {
+  if (!db) throw new Error("Database is not configured");
+  const existingSlug = await db.select({ id: streamerProfiles.id }).from(streamerProfiles).where(eq(streamerProfiles.slug, input.slug)).limit(1);
+  if (existingSlug[0]) throw new Error("That public creator slug is already in use.");
+  const owner = await db.select({ id: users.id }).from(users).where(eq(users.id, input.ownerUserId)).limit(1);
+  if (!owner[0]) throw new Error("The selected creator account was not found.");
+
+  return db.transaction(async (tx) => {
+    const profileResult = await tx.insert(streamerProfiles).values({
+      ownerUserId: input.ownerUserId,
+      slug: input.slug,
+      displayName: input.displayName,
+      bio: input.bio || null,
+      publicTipUrl: input.publicTipUrl || null,
+      approvalStatus: input.approvalStatus,
+    });
+    const profileId = Number(profileResult[0].insertId);
+    for (const entry of input.catalog) {
+      const existingGame = await tx.select().from(catalogGames).where(and(eq(catalogGames.title, entry.title), eq(catalogGames.platform, entry.platform))).limit(1);
+      const game = existingGame[0] ?? (await tx.insert(catalogGames).values({
+        title: entry.title,
+        platform: entry.platform,
+        genre: entry.genre || null,
+        note: entry.note || null,
+      }).then(async (result) => (await tx.select().from(catalogGames).where(eq(catalogGames.id, Number(result[0].insertId))).limit(1))[0]));
+      if (!game) continue;
+      const existingEntry = await tx.select({ id: streamerCatalog.id }).from(streamerCatalog).where(and(eq(streamerCatalog.streamerProfileId, profileId), eq(streamerCatalog.gameId, game.id))).limit(1);
+      if (!existingEntry[0]) await tx.insert(streamerCatalog).values({ streamerProfileId: profileId, gameId: game.id, ownershipStatus: "unconfirmed", isVisible: true });
+    }
+    return (await tx.select().from(streamerProfiles).where(eq(streamerProfiles.id, profileId)).limit(1))[0];
+  });
+}
+
+export async function listAdminCreatorProfiles() {
+  if (!db) return [];
+  return db
+    .select({ id: streamerProfiles.id, slug: streamerProfiles.slug, displayName: streamerProfiles.displayName, approvalStatus: streamerProfiles.approvalStatus, ownerUserId: streamerProfiles.ownerUserId })
+    .from(streamerProfiles)
+    .orderBy(desc(streamerProfiles.createdAt));
+}
+
+export async function setCreatorApproval(id: number, approvalStatus: "pending" | "approved" | "suspended" | "archived") {
+  if (!db) throw new Error("Database is not configured");
+  await db.update(streamerProfiles).set({ approvalStatus }).where(eq(streamerProfiles.id, id));
+  return (await db.select().from(streamerProfiles).where(eq(streamerProfiles.id, id)).limit(1))[0];
 }

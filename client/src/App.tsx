@@ -8,14 +8,17 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import BookingDashboard from "@/pages/BookingDashboard";
 import CreatorManagement from "@/pages/CreatorManagement";
+import AdminCreatorOnboarding from "@/pages/AdminCreatorOnboarding";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={BookingDashboard} />
+      <Route path="/home" component={Home} />
       <Route path="/booking" component={BookingDashboard} />
       <Route path="/booking/:creatorSlug" component={BookingDashboard} />
       <Route path="/creator" component={CreatorManagement} />
+      <Route path="/admin/onboard" component={AdminCreatorOnboarding} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -116,3 +116,29 @@
 
 - [ ] Redeploy the bundled `/assets` image fix to Vercel and verify the live homepage, favicon, hero, game art, and PayPal QR.
 - [ ] Capture desktop and mobile browser verification for the deployed image fix.
+
+- [ ] Authorize the GitHub connector for this session so the optimized image fix can be pushed to the existing repository.
+- [ ] Push the optimized `/assets` image fix to the repository and confirm Vercel detects the new commit.
+
+- [x] Add an admin-only creator onboarding workspace with validated profile and catalog fields.
+- [x] Add protected onboarding procedures with manual approval, slug uniqueness, and no-funds boundary tests.
+- [x] Add public creator-link handoff and responsive admin UI verification.
+
+- [ ] Make the booking board the immediate landing route so visitors understand the site purpose quickly.
+- [ ] Define a safe source and refresh strategy for popular Xbox and PlayStation catalog entries without handling platform transactions.
+- [ ] Surface platform-specific popular games with loading, fallback, and creator-approval boundaries.
+- [ ] Verify platform filtering, responsive booking-first layout, and no-funds wording after the catalog update.
+
+- [x] Seed the initial viewer-facing story-driven titles: Red Dead Redemption 2, Kingdom Come: Deliverance II, Grand Theft Auto V, and S.T.A.L.K.E.R. 2.
+- [x] Make the request board the first landing experience and use “Request a stream” consistently while preserving streamer flexibility.
+- [x] Sweep viewer-facing copy for simple, precise guidance and reinforce that the site does not handle funds, codes, or platform transactions.
+- [x] Replace numbered category labels with bold, large section headings and verify responsive presentation.
+
+- [ ] Ensure approved AlmostLegitTV creator/catalog data visibly includes the four story-driven titles on the root request board.
+- [ ] Finish the exact “Request a stream” terminology sweep across navigation, CTAs, modal copy, and status text.
+- [ ] Verify the populated request board at desktop and mobile widths, including title order, bold headings, no-funds guidance, and request-flow copy.
+
+- [x] Clone and inspect the public almostlegittv/a1 repository before editing.
+- [x] Compare a1 with the current AlmostLegitTV booking-first implementation.
+- [x] Port the agreed story-driven titles, request-first landing, terminology sweep, and heading hierarchy into a1.
+- [x] Validate the a1 build and commit the implementation for Vercel redeployment.
