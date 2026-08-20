@@ -184,3 +184,15 @@
 - [x] Make the authenticated AlmostLegitTV owner profile the default public example without inventing missing identity details.
 - [x] Preserve the creator-application prompt alongside the owner profile and populated story catalog.
 - [x] Verify duplicate-safe owner bootstrap, public request actions, privacy boundaries, and required sign-in prerequisite.
+
+- [x] Check the live Vercel request board for the approved AlmostLegitTV profile and seeded story titles.
+- [x] Verify live imagery, request actions, creator-application prompt, and public no-funds wording.
+- [x] Distinguish any live mismatch between deployed code and the connected database.
+
+- [ ] Identify the Vercel production database connection without exposing credentials.
+- [ ] Run the canonical owner/profile seed against production using duplicate-safe logic.
+- [ ] Verify the live Vercel board shows AlmostLegitTV and the four story titles.
+
+- [x] Add a Vercel-compatible serverless entry point for the existing Express/tRPC API.
+- [x] Route /api requests to the backend while preserving the SPA fallback for frontend routes.
+- [x] Validate the production build and API route shape before pushing the deployment fix.
