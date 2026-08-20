@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
-import { bookingRequests, catalogGames, creatorApplicationChecks, creatorApplicationEvents, creatorApplications, streamerCatalog, streamerProfiles, users } from "../drizzle/schema";
+import { bookingRequests, catalogGames, creatorApplicationChecks, creatorApplicationEvents, creatorApplications, gameSuggestions, streamerCatalog, streamerProfiles, users } from "../drizzle/schema";
 import { validateGamerTag, validatePublicStreamLink } from "../shared/identityValidation";
 
 const pool = process.env.DATABASE_URL ? mysql.createPool(process.env.DATABASE_URL) : null;
@@ -115,6 +115,28 @@ export async function listCreatorRequests(streamerProfileId: number) {
     .from(bookingRequests)
     .where(eq(bookingRequests.streamerProfileId, streamerProfileId))
     .orderBy(desc(bookingRequests.createdAt));
+}
+
+export async function createGameSuggestion(input: { streamerProfileId: number; submittedByUserId: number; title: string; platform: "xbox" | "playstation"; note?: string }) {
+  if (!db) throw new Error("Database is not configured");
+  const title = input.title.trim();
+  const existing = await db.select().from(gameSuggestions).where(and(eq(gameSuggestions.streamerProfileId, input.streamerProfileId), eq(gameSuggestions.title, title), eq(gameSuggestions.platform, input.platform), inArray(gameSuggestions.status, ["pending", "reviewed", "accepted"]))).limit(1);
+  if (existing[0]) return { created: false as const, suggestion: existing[0] };
+  const result = await db.insert(gameSuggestions).values({ ...input, title, note: input.note?.trim() || null });
+  const rows = await db.select().from(gameSuggestions).where(eq(gameSuggestions.id, Number(result[0].insertId))).limit(1);
+  return { created: true as const, suggestion: rows[0] };
+}
+
+export async function listGameSuggestions(streamerProfileId: number) {
+  if (!db) return [];
+  return db.select().from(gameSuggestions).where(eq(gameSuggestions.streamerProfileId, streamerProfileId)).orderBy(desc(gameSuggestions.createdAt));
+}
+
+export async function updateGameSuggestionStatus(id: number, status: "pending" | "reviewed" | "accepted" | "declined") {
+  if (!db) throw new Error("Database is not configured");
+  await db.update(gameSuggestions).set({ status }).where(eq(gameSuggestions.id, id));
+  const rows = await db.select().from(gameSuggestions).where(eq(gameSuggestions.id, id)).limit(1);
+  return rows[0];
 }
 
 export async function findActiveRequest(streamerProfileId: number, gameId: number) {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronRight, CircleAlert, Gamepad2, Lock, Radio, Search, Send, Users, X } from "lucide-react";
+import { Check, ChevronRight, CircleAlert, Gamepad2, Lightbulb, Lock, Radio, Search, Send, Users, X } from "lucide-react";
 import { getQuickRequestAction, isActiveRequestStatus, matchesCatalogFilters, sortCatalogGames, type CatalogFilter, type CatalogSort, type PlatformMode, type RequestStatus } from "@/lib/booking";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -81,6 +81,14 @@ export default function BookingDashboard() {
   const [viewerPlatform, setViewerPlatform] = useState("TikTok");
   const [showPrivate, setShowPrivate] = useState(false);
   const [notice, setNotice] = useState("");
+  const [showSuggestion, setShowSuggestion] = useState(false);
+  const [suggestionTitle, setSuggestionTitle] = useState("");
+  const [suggestionPlatform, setSuggestionPlatform] = useState<Platform>("xbox");
+  const [suggestionNote, setSuggestionNote] = useState("");
+  const suggestGame = trpc.booking.suggestGame.useMutation({
+    onSuccess: (result) => { setNotice(result.created ? "Game suggestion sent to the creator for review." : "That title is already in the creator’s suggestion queue."); setShowSuggestion(false); setSuggestionTitle(""); setSuggestionNote(""); },
+    onError: (error) => setNotice(error.data?.code === "UNAUTHORIZED" ? "Sign in before suggesting a game." : error.message),
+  });
 
   const persistedGames = useMemo<Game[]>(() => (catalogQuery.data ?? []).map((game, index) => ({ id: String(game.id), dbId: game.id, title: game.title, genre: game.genre ?? "Catalog title", platform: game.platform, status: game.ownershipStatus === "owned" ? "owned" : "open", note: game.note ?? "Creator-confirmed catalog entry.", releaseDate: game.releaseDate, popularityScore: game.popularityScore, queue: index + 1 })), [catalogQuery.data]);
   const boardGames = useMemo(() => [...persistedGames].sort((a, b) => storyDrivenRank(a.title) - storyDrivenRank(b.title)), [persistedGames]);
@@ -105,6 +113,13 @@ export default function BookingDashboard() {
   );
 
   const activeRequestFor = (gameId: string) => boardRequests.find((request) => request.gameId === gameId && isActiveRequestStatus(request.status));
+
+  const submitSuggestion = () => {
+    const title = suggestionTitle.trim();
+    if (title.length < 2 || !profile.data?.id) return;
+    if (!auth.data) { setNotice("Sign in before suggesting a game. Your account remains private."); startLogin(); return; }
+    suggestGame.mutate({ streamerProfileId: profile.data.id, title, platform: suggestionPlatform, note: suggestionNote.trim() || undefined });
+  };
 
   const submitRequest = () => {
     if (!selectedGame || !viewerHandle.trim()) return;
@@ -155,7 +170,7 @@ export default function BookingDashboard() {
 
       <div className="booking-grid">
         <section className="booking-catalog" aria-labelledby="catalog-heading">
-          <div className="booking-section-heading"><div><p className="eyebrow">CREATOR CATALOG</p><h2 id="catalog-heading">Request a stream.</h2><p className="booking-section-intro">Start with the story-driven picks below, or search the creator’s full approved catalog.</p></div><span className="booking-count">{visibleGames.length} of {boardGames.length} titles</span></div>
+          <div className="booking-section-heading"><div><p className="eyebrow">CREATOR CATALOG</p><h2 id="catalog-heading">Request a stream.</h2><p className="booking-section-intro">Start with the story-driven picks below, or search the creator’s full approved catalog.</p></div><div className="booking-heading-actions"><span className="booking-count">{visibleGames.length} of {boardGames.length} titles</span><button type="button" className="booking-suggest-button" onClick={() => setShowSuggestion(true)}><Lightbulb size={15} /> Request a Game</button></div></div>
           <div className="booking-catalog-tools" aria-label="Search and filter catalog">
             <label className="booking-search"><Search size={17} aria-hidden="true" /><span className="sr-only">Search games by title or genre</span><input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search title or genre…" aria-label="Search games by title or genre" /></label>
             <div className="booking-filter-group" aria-label="Filter catalog by ownership">
@@ -191,6 +206,8 @@ export default function BookingDashboard() {
       </div>
 
       <section className="booking-disclosure"><CircleAlert size={18} /><p><strong>No-funds boundary.</strong> This is a stream request, not a purchase, payment, donation, contract, or guarantee. Xbox/PlayStation purchases, gift cards, wallet credit, codes, refunds, and eligibility stay on the platform’s own system.</p></section>
+
+      {showSuggestion && <div className="booking-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setShowSuggestion(false); }}><section className="booking-modal" role="dialog" aria-modal="true" aria-labelledby="suggestion-modal-title"><button className="booking-modal__close" type="button" onClick={() => setShowSuggestion(false)} aria-label="Close game suggestion dialog"><X size={18} /></button><p className="eyebrow">CATALOG SUGGESTION</p><h2 id="suggestion-modal-title">Request a Game.</h2><p>Suggest a title for the creator to consider adding. This sends an idea for review; it does not purchase, gift, reserve, or transfer anything.</p><label>Game title<input value={suggestionTitle} onChange={(event) => setSuggestionTitle(event.target.value)} placeholder="e.g. Baldur’s Gate 3" maxLength={180} /></label><label>Platform<select value={suggestionPlatform} onChange={(event) => setSuggestionPlatform(event.target.value as Platform)}><option value="xbox">Xbox</option><option value="playstation">PlayStation</option></select></label><label>Optional note<textarea value={suggestionNote} onChange={(event) => setSuggestionNote(event.target.value)} placeholder="Why would this make a good stream?" maxLength={1000} rows={3} /></label><div className="booking-modal__hint"><Lock size={14} /> Your account identifies the suggestion privately to the creator. No money, codes, or platform transactions are handled here.</div><button className="signal-button signal-button--primary booking-modal__submit" type="button" onClick={submitSuggestion} disabled={suggestionTitle.trim().length < 2 || suggestGame.isPending}>Send game suggestion <Send size={16} /></button></section></div>}
 
       {selectedGame && <div className="booking-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedGame(null); }}><section className="booking-modal" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title"><button className="booking-modal__close" type="button" onClick={() => setSelectedGame(null)} aria-label="Close request dialog"><X size={18} /></button><p className="eyebrow">REQUEST A STREAM / {platformLabel(selectedGame.platform)}</p><h2 id="booking-modal-title">{selectedGame.title}</h2><p>Tell the creator which streaming identity to look for. They will confirm whether the game is already owned after reviewing the request.</p><label>Streaming platform<select value={viewerPlatform} onChange={(event) => setViewerPlatform(event.target.value)}><option>TikTok</option><option>Twitch</option><option>YouTube</option><option>Kick</option><option>Other</option></select></label><label>Streaming username<input value={viewerHandle} onChange={(event) => setViewerHandle(event.target.value)} placeholder="@yourhandle" /></label><div className="booking-modal__hint"><Lock size={14} /> Your account details stay private. The creator sees this streaming identity only to recognize you on the mutual platform.</div><button className="signal-button signal-button--primary booking-modal__submit" type="button" onClick={submitRequest} disabled={!viewerHandle.trim()}>Submit stream request <Send size={16} /></button></section></div>}
     </main>

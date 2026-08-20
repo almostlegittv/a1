@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { z } from "zod";
-import { createBookingRequest, createCreatorApplication, createCreatorOnboarding, findActiveRequest, getCreatorApplicationForUser, getStreamerProfileBySlug, listAdminCreatorProfiles, listCreatorApplicationChecks, listCreatorApplicationEvents, listCreatorApplicationsForAdmin, listApprovedCatalog, listCreatorRequests, listPublicRequests, listUsersForAdminOnboarding, reviewCreatorApplication, setCatalogOwnership, setCreatorApproval, updateCreatorApplicationCheck, updateRequestStatus } from "./db";
+import { createBookingRequest, createCreatorApplication, createCreatorOnboarding, createGameSuggestion, findActiveRequest, getCreatorApplicationForUser, getStreamerProfileBySlug, listAdminCreatorProfiles, listCreatorApplicationChecks, listCreatorApplicationEvents, listCreatorApplicationsForAdmin, listApprovedCatalog, listCreatorRequests, listGameSuggestions, listPublicRequests, listUsersForAdminOnboarding, reviewCreatorApplication, setCatalogOwnership, setCreatorApproval, updateCreatorApplicationCheck, updateGameSuggestionStatus, updateRequestStatus } from "./db";
 
 export type AppUser = { id: number; role: "user" | "admin"; streamerProfileId?: number } | null;
 export type AppContext = { user: AppUser };
@@ -71,6 +71,9 @@ export const appRouter = t.router({
     classifyRequest: creatorProcedure.input(z.object({ id: z.number().int().positive(), status: requestStatus })).mutation(({ input }) => updateRequestStatus(input.id, input.status)),
     setOwnership: creatorProcedure.input(z.object({ id: z.number().int().positive(), ownershipStatus: z.enum(["unconfirmed", "owned"]) })).mutation(({ input }) => setCatalogOwnership(input.id, input.ownershipStatus)),
     activeRequest: publicProcedure.input(z.object({ streamerProfileId: z.number().int().positive(), gameId: z.number().int().positive() })).query(({ input }) => findActiveRequest(input.streamerProfileId, input.gameId)),
+    suggestGame: protectedProcedure.input(z.object({ streamerProfileId: z.number().int().positive(), title: z.string().trim().min(2).max(180), platform: z.enum(["xbox", "playstation"]), note: z.string().trim().max(1000).optional() })).mutation(({ ctx, input }) => createGameSuggestion({ ...input, submittedByUserId: ctx.user!.id })),
+    creatorSuggestions: creatorProcedure.input(z.object({ streamerProfileId: z.number().int().positive() })).query(({ ctx, input }) => { if (ctx.user?.role !== "admin" && ctx.user?.streamerProfileId !== input.streamerProfileId) throw new TRPCError({ code: "FORBIDDEN" }); return listGameSuggestions(input.streamerProfileId); }),
+    updateSuggestion: creatorProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(["pending", "reviewed", "accepted", "declined"]) })).mutation(({ input }) => updateGameSuggestionStatus(input.id, input.status)),
   }),
 });
 

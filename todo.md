@@ -225,3 +225,8 @@
 - [x] Inspect the production seeding helpers, schema, and deployment environment requirements.
 - [x] Design a duplicate-safe production seed procedure for the owner profile and four story titles.
 - [x] Document the exact Vercel/MySQL steps and verification queries without exposing credentials.
+
+- [x] Add a persisted viewer game-suggestion model with creator scoping, validation, and no-funds boundaries.
+- [x] Add protected/public procedures for submitting and reviewing game suggestions.
+- [x] Add a prominent Request a Game button and accessible suggestion form to the catalog page.
+- [x] Add creator/admin visibility for submitted suggestions and test the complete flow.

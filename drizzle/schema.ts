@@ -108,6 +108,21 @@ export const creatorApplicationEvents = mysqlTable("creator_application_events",
   actorUserFk: foreignKey({ columns: [table.actorUserId], foreignColumns: [users.id], name: "creator_application_events_actor_user_fk" }),
 }));
 
+export const gameSuggestions = mysqlTable("game_suggestions", {
+  id: int("id").autoincrement().primaryKey(),
+  streamerProfileId: int("streamerProfileId").notNull(),
+  submittedByUserId: int("submittedByUserId").notNull(),
+  title: varchar("title", { length: 180 }).notNull(),
+  platform: mysqlEnum("platform", ["xbox", "playstation"]).notNull(),
+  note: text("note"),
+  status: mysqlEnum("status", ["pending", "reviewed", "accepted", "declined"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  streamerProfileFk: foreignKey({ columns: [table.streamerProfileId], foreignColumns: [streamerProfiles.id], name: "game_suggestions_profile_fk" }),
+  submittedByUserFk: foreignKey({ columns: [table.submittedByUserId], foreignColumns: [users.id], name: "game_suggestions_submitter_fk" }),
+}));
+
 export const bookingRequests = mysqlTable("booking_requests", {
   id: int("id").autoincrement().primaryKey(),
   streamerProfileId: int("streamerProfileId").notNull(),
