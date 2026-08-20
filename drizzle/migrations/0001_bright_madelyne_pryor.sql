@@ -1,0 +1,6 @@
+ALTER TABLE `booking_requests` ADD CONSTRAINT `booking_requests_profile_fk` FOREIGN KEY (`streamerProfileId`) REFERENCES `streamer_profiles`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `booking_requests` ADD CONSTRAINT `booking_requests_game_fk` FOREIGN KEY (`gameId`) REFERENCES `catalog_games`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `booking_requests` ADD CONSTRAINT `booking_requests_viewer_user_fk` FOREIGN KEY (`viewerUserId`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `streamer_catalog` ADD CONSTRAINT `streamer_catalog_profile_fk` FOREIGN KEY (`streamerProfileId`) REFERENCES `streamer_profiles`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `streamer_catalog` ADD CONSTRAINT `streamer_catalog_game_fk` FOREIGN KEY (`gameId`) REFERENCES `catalog_games`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `streamer_profiles` ADD CONSTRAINT `streamer_profiles_owner_user_fk` FOREIGN KEY (`ownerUserId`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;
