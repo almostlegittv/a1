@@ -142,3 +142,9 @@
 - [x] Compare a1 with the current AlmostLegitTV booking-first implementation.
 - [x] Port the agreed story-driven titles, request-first landing, terminology sweep, and heading hierarchy into a1.
 - [x] Validate the a1 build and commit the implementation for Vercel redeployment.
+
+- [x] Add an easy public entry point for creators to apply for a portfolio.
+- [x] Add a creator application form for profile details, gamer tags, platforms, stream links, and catalog information.
+- [x] Add private admin review procedures and a verification queue with approve, reject, and needs-changes states.
+- [x] Ensure applicants cannot self-publish and unapproved applications never appear as public creator portfolios.
+- [x] Add tests for application validation, admin authorization, review transitions, and no-funds boundaries.

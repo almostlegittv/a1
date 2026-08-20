@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
-import { bookingRequests, catalogGames, streamerCatalog, streamerProfiles, users } from "../drizzle/schema";
+import { bookingRequests, catalogGames, creatorApplications, streamerCatalog, streamerProfiles, users } from "../drizzle/schema";
 
 const pool = process.env.DATABASE_URL ? mysql.createPool(process.env.DATABASE_URL) : null;
 export const db = pool ? drizzle(pool) : null;
@@ -215,4 +215,87 @@ export async function setCreatorApproval(id: number, approvalStatus: "pending" |
   if (!db) throw new Error("Database is not configured");
   await db.update(streamerProfiles).set({ approvalStatus }).where(eq(streamerProfiles.id, id));
   return (await db.select().from(streamerProfiles).where(eq(streamerProfiles.id, id)).limit(1))[0];
+}
+
+export type CreatorApplicationInput = {
+  applicantUserId: number;
+  displayName: string;
+  requestedSlug: string;
+  bio?: string;
+  gamerTags: Array<{ platform: "xbox" | "playstation"; handle: string }>;
+  streamLinks: Array<{ platform: string; url: string }>;
+  catalog: Array<{ title: string; platform: "xbox" | "playstation"; genre?: string; note?: string }>;
+};
+
+export async function createCreatorApplication(input: CreatorApplicationInput) {
+  if (!db) throw new Error("Database is not configured");
+  const existing = (await db.select().from(creatorApplications).where(and(eq(creatorApplications.applicantUserId, input.applicantUserId), inArray(creatorApplications.status, ["pending", "in_review", "needs_changes"]))).orderBy(desc(creatorApplications.createdAt)).limit(1))[0];
+  if (existing && existing.status !== "needs_changes") throw new Error("You already have an application under review.");
+  const slugTaken = await db.select({ id: streamerProfiles.id }).from(streamerProfiles).where(eq(streamerProfiles.slug, input.requestedSlug)).limit(1);
+  if (slugTaken[0]) throw new Error("That public creator slug is already in use.");
+  if (existing) {
+    await db.update(creatorApplications).set({ displayName: input.displayName, requestedSlug: input.requestedSlug, bio: input.bio || null, gamerTags: JSON.stringify(input.gamerTags), streamLinks: JSON.stringify(input.streamLinks), catalogDraft: JSON.stringify(input.catalog), status: "pending", reviewerNotes: null, reviewedByUserId: null }).where(eq(creatorApplications.id, existing.id));
+    return (await db.select().from(creatorApplications).where(eq(creatorApplications.id, existing.id)).limit(1))[0];
+  }
+  const applicationResult = await db.insert(creatorApplications).values({
+    applicantUserId: input.applicantUserId,
+    displayName: input.displayName,
+    requestedSlug: input.requestedSlug,
+    bio: input.bio || null,
+    gamerTags: JSON.stringify(input.gamerTags),
+    streamLinks: JSON.stringify(input.streamLinks),
+    catalogDraft: JSON.stringify(input.catalog),
+    status: "pending",
+  });
+  return (await db.select().from(creatorApplications).where(eq(creatorApplications.id, Number(applicationResult[0].insertId))).limit(1))[0];
+}
+
+export async function getCreatorApplicationForUser(applicantUserId: number) {
+  if (!db) return undefined;
+  return (await db.select().from(creatorApplications).where(eq(creatorApplications.applicantUserId, applicantUserId)).orderBy(desc(creatorApplications.createdAt)).limit(1))[0];
+}
+
+export async function listCreatorApplicationsForAdmin() {
+  if (!db) return [];
+  return db.select({
+    id: creatorApplications.id,
+    applicantUserId: creatorApplications.applicantUserId,
+    applicantName: users.name,
+    applicantEmail: users.email,
+    displayName: creatorApplications.displayName,
+    requestedSlug: creatorApplications.requestedSlug,
+    bio: creatorApplications.bio,
+    gamerTags: creatorApplications.gamerTags,
+    streamLinks: creatorApplications.streamLinks,
+    catalogDraft: creatorApplications.catalogDraft,
+    status: creatorApplications.status,
+    reviewerNotes: creatorApplications.reviewerNotes,
+    createdAt: creatorApplications.createdAt,
+    updatedAt: creatorApplications.updatedAt,
+  }).from(creatorApplications).innerJoin(users, eq(creatorApplications.applicantUserId, users.id)).orderBy(desc(creatorApplications.createdAt));
+}
+
+export async function reviewCreatorApplication(input: { id: number; reviewerUserId: number; status: "in_review" | "needs_changes" | "approved" | "rejected"; reviewerNotes?: string }) {
+  if (!db) throw new Error("Database is not configured");
+  const application = (await db.select().from(creatorApplications).where(eq(creatorApplications.id, input.id)).limit(1))[0];
+  if (!application) throw new Error("Creator application not found.");
+  if (input.status !== "approved") {
+    await db.update(creatorApplications).set({ status: input.status, reviewerNotes: input.reviewerNotes || null, reviewedByUserId: input.reviewerUserId }).where(eq(creatorApplications.id, input.id));
+    return (await db.select().from(creatorApplications).where(eq(creatorApplications.id, input.id)).limit(1))[0];
+  }
+  const existingSlug = await db.select({ id: streamerProfiles.id }).from(streamerProfiles).where(eq(streamerProfiles.slug, application.requestedSlug)).limit(1);
+  if (existingSlug[0]) throw new Error("That public creator slug is already in use.");
+  let catalog: Array<{ title: string; platform: "xbox" | "playstation"; genre?: string; note?: string }> = [];
+  try { catalog = JSON.parse(application.catalogDraft) as typeof catalog; } catch { throw new Error("The application catalog is invalid."); }
+  return db.transaction(async (tx) => {
+    const profileResult = await tx.insert(streamerProfiles).values({ ownerUserId: application.applicantUserId, slug: application.requestedSlug, displayName: application.displayName, bio: application.bio, approvalStatus: "approved" });
+    const profileId = Number(profileResult[0].insertId);
+    for (const entry of catalog) {
+      const existingGame = await tx.select().from(catalogGames).where(and(eq(catalogGames.title, entry.title), eq(catalogGames.platform, entry.platform))).limit(1);
+      const game = existingGame[0] ?? (await tx.insert(catalogGames).values({ title: entry.title, platform: entry.platform, genre: entry.genre || null, note: entry.note || null }).then(async (result) => (await tx.select().from(catalogGames).where(eq(catalogGames.id, Number(result[0].insertId))).limit(1))[0]));
+      if (game) await tx.insert(streamerCatalog).values({ streamerProfileId: profileId, gameId: game.id, ownershipStatus: "unconfirmed", isVisible: true });
+    }
+    await tx.update(creatorApplications).set({ status: "approved", reviewerNotes: input.reviewerNotes || null, reviewedByUserId: input.reviewerUserId }).where(eq(creatorApplications.id, input.id));
+    return (await tx.select().from(creatorApplications).where(eq(creatorApplications.id, input.id)).limit(1))[0];
+  });
 }

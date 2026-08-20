@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { z } from "zod";
-import { createBookingRequest, createCreatorOnboarding, findActiveRequest, getStreamerProfileBySlug, listAdminCreatorProfiles, listApprovedCatalog, listCreatorRequests, listPublicRequests, listUsersForAdminOnboarding, setCatalogOwnership, setCreatorApproval, updateRequestStatus } from "./db";
+import { createBookingRequest, createCreatorApplication, createCreatorOnboarding, findActiveRequest, getCreatorApplicationForUser, getStreamerProfileBySlug, listAdminCreatorProfiles, listCreatorApplicationsForAdmin, listApprovedCatalog, listCreatorRequests, listPublicRequests, listUsersForAdminOnboarding, reviewCreatorApplication, setCatalogOwnership, setCreatorApproval, updateRequestStatus } from "./db";
 
 export type AppUser = { id: number; role: "user" | "admin"; streamerProfileId?: number } | null;
 export type AppContext = { user: AppUser };
@@ -27,8 +27,21 @@ export const appRouter = t.router({
   auth: t.router({
     me: publicProcedure.query(({ ctx }) => ctx.user),
   }),
+  creatorApplications: t.router({
+    mine: protectedProcedure.query(({ ctx }) => getCreatorApplicationForUser(ctx.user!.id)),
+    submit: protectedProcedure.input(z.object({
+      displayName: z.string().trim().min(2).max(160),
+      requestedSlug: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and single hyphens only.").max(96),
+      bio: z.string().trim().max(2000).optional(),
+      gamerTags: z.array(z.object({ platform: z.enum(["xbox", "playstation"]), handle: z.string().trim().min(2).max(160) })).min(1).max(4),
+      streamLinks: z.array(z.object({ platform: z.string().trim().min(2).max(40), url: z.string().trim().url().max(512) })).min(1).max(8),
+      catalog: z.array(z.object({ title: z.string().trim().min(1).max(180), platform: z.enum(["xbox", "playstation"]), genre: z.string().trim().max(120).optional(), note: z.string().trim().max(1000).optional() })).min(1).max(100),
+    })).mutation(({ ctx, input }) => createCreatorApplication({ ...input, applicantUserId: ctx.user!.id })),
+  }),
   admin: t.router({
     users: adminProcedure.query(() => listUsersForAdminOnboarding()),
+    applications: adminProcedure.query(() => listCreatorApplicationsForAdmin()),
+    reviewApplication: adminProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(["in_review", "needs_changes", "approved", "rejected"]), reviewerNotes: z.string().trim().max(2000).optional() })).mutation(({ ctx, input }) => reviewCreatorApplication({ ...input, reviewerUserId: ctx.user!.id })),
     creators: adminProcedure.query(() => listAdminCreatorProfiles()),
     createCreator: adminProcedure.input(z.object({
       ownerUserId: z.number().int().positive(),

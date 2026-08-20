@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, Check, Copy, ExternalLink, Lock, Plus, ShieldAlert, UserPlus } from "lucide-react";
+import { ArrowLeft, Check, Copy, ExternalLink, FileCheck2, Lock, Plus, ShieldAlert, UserPlus } from "lucide-react";
 import { Link } from "wouter";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -80,6 +80,8 @@ export default function AdminCreatorOnboarding() {
         </section>
       ) : (
         <>
+          <section className="booking-notice admin-link-notice" aria-label="Application review shortcut"><FileCheck2 size={18} /><div><strong>Creator applications need review?</strong><span>Open the private verification queue before approving a public portfolio.</span></div><Link href="/admin/applications" className="signal-button signal-button--ghost">Review applications <ExternalLink size={15} /></Link></section>
+
           <section className="creator-catalog-workspace" aria-labelledby="onboarding-form-heading">
             <div className="booking-section-heading"><div><p className="eyebrow"><Plus size={14} /> NEW CREATOR PROFILE</p><h2 id="onboarding-form-heading">Profile intake.</h2></div><span className="booking-count">Admin only</span></div>
             <div className="admin-onboarding-grid">

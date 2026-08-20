@@ -3,7 +3,7 @@ import { Check, ChevronRight, CircleAlert, Gamepad2, Lock, Radio, Search, Send, 
 import { getQuickRequestAction, isActiveRequestStatus, matchesCatalogFilters, sortCatalogGames, type CatalogFilter, type CatalogSort, type PlatformMode, type RequestStatus } from "@/lib/booking";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { useRoute } from "wouter";
+import { Link, useRoute } from "wouter";
 
 type Platform = "xbox" | "playstation";
 
@@ -138,6 +138,7 @@ export default function BookingDashboard() {
           <div className="booking-avatar">AL</div>
           <div><strong>{profile.data?.displayName ?? creatorSlug}</strong><span><span className="live-dot" /> Approved creator</span></div>
         </div>
+        <Link href="/apply/creator" className="booking-creator-apply"><Users size={15} /> Are you a creator? Apply for a portfolio</Link>
       </header>
 
       <section className="platform-switcher" aria-label="Choose platform mode">

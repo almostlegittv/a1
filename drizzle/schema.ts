@@ -52,6 +52,25 @@ export const streamerCatalog = mysqlTable("streamer_catalog", {
   catalogGameFk: foreignKey({ columns: [table.gameId], foreignColumns: [catalogGames.id], name: "streamer_catalog_game_fk" }),
 }));
 
+export const creatorApplications = mysqlTable("creator_applications", {
+  id: int("id").autoincrement().primaryKey(),
+  applicantUserId: int("applicantUserId").notNull(),
+  displayName: varchar("displayName", { length: 160 }).notNull(),
+  requestedSlug: varchar("requestedSlug", { length: 96 }).notNull(),
+  bio: text("bio"),
+  gamerTags: text("gamerTags").notNull(),
+  streamLinks: text("streamLinks").notNull(),
+  catalogDraft: text("catalogDraft").notNull(),
+  status: mysqlEnum("status", ["pending", "in_review", "needs_changes", "approved", "rejected"]).default("pending").notNull(),
+  reviewerNotes: text("reviewerNotes"),
+  reviewedByUserId: int("reviewedByUserId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  applicantUserFk: foreignKey({ columns: [table.applicantUserId], foreignColumns: [users.id], name: "creator_applications_applicant_user_fk" }),
+  reviewerUserFk: foreignKey({ columns: [table.reviewedByUserId], foreignColumns: [users.id], name: "creator_applications_reviewer_user_fk" }),
+}));
+
 export const bookingRequests = mysqlTable("booking_requests", {
   id: int("id").autoincrement().primaryKey(),
   streamerProfileId: int("streamerProfileId").notNull(),
@@ -75,3 +94,4 @@ export type StreamerProfile = typeof streamerProfiles.$inferSelect;
 export type CatalogGame = typeof catalogGames.$inferSelect;
 export type StreamerCatalogEntry = typeof streamerCatalog.$inferSelect;
 export type BookingRequest = typeof bookingRequests.$inferSelect;
+export type CreatorApplication = typeof creatorApplications.$inferSelect;

@@ -8,7 +8,9 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import BookingDashboard from "@/pages/BookingDashboard";
 import CreatorManagement from "@/pages/CreatorManagement";
-import AdminCreatorOnboarding from "@/pages/AdminCreatorOnboarding";
+import AdminCreatorOnboarding from "./pages/AdminCreatorOnboarding";
+import CreatorApplication from "./pages/CreatorApplication";
+import AdminCreatorApplications from "./pages/AdminCreatorApplications";
 
 function Router() {
   return (
@@ -19,6 +21,8 @@ function Router() {
       <Route path="/booking/:creatorSlug" component={BookingDashboard} />
       <Route path="/creator" component={CreatorManagement} />
       <Route path="/admin/onboard" component={AdminCreatorOnboarding} />
+      <Route path="/apply/creator" component={CreatorApplication} />
+      <Route path="/admin/applications" component={AdminCreatorApplications} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

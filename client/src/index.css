@@ -460,3 +460,32 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .booking-section-heading h2 { font-size: clamp(2.25rem, 5vw, 4.15rem); font-weight: 700; letter-spacing: -.08em; }
 .booking-section-intro { max-width: 520px; margin: .75rem 0 0; color: #bfc3b9; font-size: .92rem; line-height: 1.55; }
 .booking-game-card__top > span:last-child { color: var(--platform-accent); font-size: .56rem; }
+
+.booking-creator-apply { display: inline-flex; align-items: center; gap: .45rem; margin-top: 1rem; width: fit-content; color: var(--signal); font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-decoration: none; }
+.booking-creator-apply:hover { color: var(--bone); }
+.creator-application-form, .admin-review-list { margin-top: 2rem; padding: clamp(1rem, 3vw, 2rem); border: 1px solid rgba(244,243,235,.16); background: rgba(23,26,21,.72); }
+.application-fieldset { margin-top: 1rem; padding: 1rem; border: 1px solid rgba(244,243,235,.12); background: rgba(16,17,15,.72); }
+.application-fieldset__header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; color: var(--bone); font-size: .8rem; }
+.application-fieldset__header button, .application-review-actions button { display: inline-flex; align-items: center; gap: .35rem; min-height: 34px; padding: .45rem .65rem; border: 1px solid rgba(244,243,235,.18); background: transparent; color: #c6cec1; cursor: pointer; }
+.application-fieldset__header button:hover, .application-review-actions button:hover { border-color: var(--signal); color: var(--signal); }
+.application-row, .application-game-row { display: grid; grid-template-columns: 150px 1fr auto; gap: .55rem; margin-top: .55rem; }
+.application-game-row { grid-template-columns: 1.3fr 150px 1fr 1.2fr auto; }
+.application-row button, .application-game-row button { border: 0; background: transparent; color: #9ba395; cursor: pointer; }
+.application-row button:hover, .application-game-row button:hover { color: #ff8c78; }
+.application-row__platform { max-width: 150px; }
+.application-review-card { margin-top: 1rem; padding: clamp(1rem, 2vw, 1.4rem); border: 1px solid rgba(244,243,235,.16); background: #151814; }
+.application-review-card__header { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+.application-review-card__header h3 { margin: .25rem 0; color: var(--bone); font-family: "Space Grotesk", sans-serif; font-size: clamp(1.35rem, 3vw, 2rem); }
+.application-review-card__header p:not(.eyebrow) { margin: 0; color: #9da398; font-size: .78rem; }
+.application-status { display: inline-flex; padding: .4rem .55rem; border: 1px solid rgba(244,243,235,.18); color: #c6cec1; font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.application-status--pending, .application-status--in_review { border-color: rgba(255,207,92,.45); color: #ffcf5c; }
+.application-status--needs_changes { border-color: rgba(255,151,102,.45); color: #ff9766; }
+.application-status--approved { border-color: rgba(184,255,44,.5); color: var(--signal); }
+.application-status--rejected { border-color: rgba(255,112,112,.45); color: #ff8b8b; }
+.application-review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1.1rem 0; color: #bfc3b9; font-size: .82rem; line-height: 1.5; }
+.application-review-grid strong { display: block; margin-top: .75rem; color: var(--bone); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; }
+.application-review-grid p { margin: .3rem 0; }
+.application-review-grid a { display: inline-flex; align-items: center; gap: .3rem; color: var(--signal); }
+.application-review-actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 1rem; }
+.application-review-actions .signal-button { border-color: var(--signal); }
+@media (max-width: 720px) { .application-row, .application-game-row, .application-review-grid { grid-template-columns: 1fr; } .application-row__platform { max-width: none; } .application-review-card__header { flex-direction: column; } .application-review-actions > * { flex: 1 1 100%; justify-content: center; } }
