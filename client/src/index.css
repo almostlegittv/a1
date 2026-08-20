@@ -536,3 +536,16 @@ input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: #ff865
 .application-review-actions .signal-button:disabled { border-color: rgba(244,243,235,.13); background: #34372f; color: #858a7e; cursor: not-allowed; }
 @media (max-width: 820px) { .admin-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .admin-queue-toolbar { grid-template-columns: 1fr 1fr; } .admin-search { grid-column: 1 / -1; } }
 @media (max-width: 560px) { .admin-metric-grid { grid-template-columns: 1fr 1fr; } .admin-queue-toolbar { grid-template-columns: 1fr; } .admin-search { grid-column: auto; } .application-review-card__progress { align-items: flex-start; flex-direction: column; } }
+
+.identity-validation { display: block; grid-column: 1 / -1; margin-top: -.2rem; color: #9ea398; font-size: .68rem; line-height: 1.35; }
+.identity-validation > span { display: inline-block; width: 6px; height: 6px; margin-right: .35rem; border-radius: 50%; background: #8b9086; }
+.identity-validation--passed { color: var(--signal); }
+.identity-validation--passed > span { background: var(--signal); }
+.identity-validation--warning { color: #e2bb68; }
+.identity-validation--warning > span { background: #e2bb68; }
+.identity-validation--failed { color: #ff9b80; }
+.identity-validation--failed > span { background: #ff8652; }
+.automated-check { display: block; margin-top: .25rem; font-size: .68rem; line-height: 1.35; }
+.automated-check--passed { color: var(--signal); }
+.automated-check--warning { color: #e2bb68; }
+.automated-check--failed { color: #ff9b80; }

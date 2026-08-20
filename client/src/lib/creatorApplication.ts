@@ -4,6 +4,7 @@ export type CreatorApplicationLink = { platform: string; url: string };
 export type CreatorApplicationGame = { title: string; platform: CreatorApplicationPlatform; genre?: string; note?: string };
 export type CreatorApplicationDraft = { displayName: string; requestedSlug: string; bio: string; gamerTags: CreatorApplicationTag[]; streamLinks: CreatorApplicationLink[]; catalog: CreatorApplicationGame[] };
 export type CreatorApplicationErrors = Record<string, string>;
+export { validateGamerTag, validatePublicStreamLink } from "../../../shared/identityValidation";
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 

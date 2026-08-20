@@ -1,0 +1,2 @@
+ALTER TABLE `creator_application_checks` ADD `automatedStatus` enum('not_run','passed','warning','failed') DEFAULT 'not_run' NOT NULL;--> statement-breakpoint
+ALTER TABLE `creator_application_checks` ADD `automatedNote` text;

@@ -164,3 +164,7 @@
 - [x] Add admin review queue filters and summary metrics for creator applications.
 - [x] Improve application cards with verification progress, safer approval affordances, notes, and audit history.
 - [x] Verify admin-only rendering, review actions, responsive layout, and public-visibility boundaries.
+
+- [x] Define safe structural validation for public stream URLs and Xbox/PlayStation gamer tags.
+- [x] Show automated validation results in creator submission and admin review interfaces without claiming account ownership.
+- [x] Add tests for valid, invalid, unsupported, and no-credential validation cases.

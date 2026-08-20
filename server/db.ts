@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { bookingRequests, catalogGames, creatorApplicationChecks, creatorApplicationEvents, creatorApplications, streamerCatalog, streamerProfiles, users } from "../drizzle/schema";
+import { validateGamerTag, validatePublicStreamLink } from "../shared/identityValidation";
 
 const pool = process.env.DATABASE_URL ? mysql.createPool(process.env.DATABASE_URL) : null;
 export const db = pool ? drizzle(pool) : null;
@@ -236,6 +237,13 @@ export async function createCreatorApplication(input: CreatorApplicationInput) {
   if (existing) {
     await db.update(creatorApplications).set({ displayName: input.displayName, requestedSlug: input.requestedSlug, bio: input.bio || null, gamerTags: JSON.stringify(input.gamerTags), streamLinks: JSON.stringify(input.streamLinks), catalogDraft: JSON.stringify(input.catalog), status: "pending", reviewerNotes: null, reviewedByUserId: null }).where(eq(creatorApplications.id, existing.id));
     await db.delete(creatorApplicationChecks).where(eq(creatorApplicationChecks.applicationId, existing.id));
+    await db.insert(creatorApplicationChecks).values([
+      { applicationId: existing.id, checkType: "identity", subject: input.displayName },
+      ...input.gamerTags.map((tag) => { const result = validateGamerTag(tag.platform, tag.handle); return { applicationId: existing.id, checkType: "gamer_tag" as const, subject: `${tag.platform}: ${tag.handle}`, automatedStatus: result.status === "passed" ? "passed" as const : result.status === "warning" ? "warning" as const : "failed" as const, automatedNote: result.note }; }),
+      ...input.streamLinks.map((link) => { const result = validatePublicStreamLink(link.platform, link.url); return { applicationId: existing.id, checkType: "stream_profile" as const, subject: link.platform, evidenceUrl: link.url, automatedStatus: result.status === "passed" ? "passed" as const : result.status === "warning" ? "warning" as const : "failed" as const, automatedNote: result.note }; }),
+      { applicationId: existing.id, checkType: "catalog" as const, subject: `${input.catalog.length} submitted catalog entries` },
+      { applicationId: existing.id, checkType: "policy" as const, subject: "No-funds and platform-boundary acknowledgement" },
+    ]);
     await db.insert(creatorApplicationEvents).values({ applicationId: existing.id, actorUserId: input.applicantUserId, fromStatus: existing.status, toStatus: "pending", note: "Applicant resubmitted after requested changes." });
     return (await db.select().from(creatorApplications).where(eq(creatorApplications.id, existing.id)).limit(1))[0];
   }
@@ -252,8 +260,8 @@ export async function createCreatorApplication(input: CreatorApplicationInput) {
   const applicationId = Number(applicationResult[0].insertId);
   await db.insert(creatorApplicationChecks).values([
     { applicationId, checkType: "identity", subject: input.displayName },
-    ...input.gamerTags.map((tag) => ({ applicationId, checkType: "gamer_tag" as const, subject: `${tag.platform}: ${tag.handle}` })),
-    ...input.streamLinks.map((link) => ({ applicationId, checkType: "stream_profile" as const, subject: link.platform, evidenceUrl: link.url })),
+    ...input.gamerTags.map((tag) => { const result = validateGamerTag(tag.platform, tag.handle); return { applicationId, checkType: "gamer_tag" as const, subject: `${tag.platform}: ${tag.handle}`, automatedStatus: result.status === "passed" ? "passed" as const : result.status === "warning" ? "warning" as const : "failed" as const, automatedNote: result.note }; }),
+    ...input.streamLinks.map((link) => { const result = validatePublicStreamLink(link.platform, link.url); return { applicationId, checkType: "stream_profile" as const, subject: link.platform, evidenceUrl: link.url, automatedStatus: result.status === "passed" ? "passed" as const : result.status === "warning" ? "warning" as const : "failed" as const, automatedNote: result.note }; }),
     { applicationId, checkType: "catalog", subject: `${input.catalog.length} submitted catalog entries` },
     { applicationId, checkType: "policy", subject: "No-funds and platform-boundary acknowledgement" },
   ]);
