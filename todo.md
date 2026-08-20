@@ -196,3 +196,15 @@
 - [x] Add a Vercel-compatible serverless entry point for the existing Express/tRPC API.
 - [x] Route /api requests to the backend while preserving the SPA fallback for frontend routes.
 - [x] Validate the production build and API route shape before pushing the deployment fix.
+
+- [ ] Choose a beginner-friendly MySQL-compatible provider and create a database with SSL.
+- [ ] Apply the AlmostLegitTV migrations and connect the database to Vercel securely.
+- [ ] Redeploy, sign in as owner, and verify the live seeded profile and story catalog.
+
+- [ ] Test the production MySQL connection locally without exposing DATABASE_URL.
+- [ ] Run the Drizzle migration and verify the resulting schema safely.
+- [ ] Record the migration result and next Vercel configuration step.
+
+- [x] Remove the invalid `nodejs22.x` Vercel function runtime declaration.
+- [x] Validate the corrected Vercel configuration and serverless API build.
+- [x] Push the fix and confirm the mobile redeploy path.
