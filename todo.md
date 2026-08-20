@@ -172,3 +172,15 @@
 - [x] Restore richer imagery and story-driven visual anchors on the request-first landing experience.
 - [x] Increase useful first-viewport content density without weakening the primary request action.
 - [x] Verify artwork loading, desktop/mobile balance, accessibility, and visual consistency with the Signal Raid system.
+
+- [x] Review the request board, restored imagery, and image-loading behavior on desktop and mobile.
+- [x] Review creator application and admin review usability, privacy, and authorization boundaries.
+- [x] Run final checks and document confirmed issues versus prioritized recommendations.
+
+- [x] Seed the preview database with the approved AlmostLegitTV creator profile and four story-driven catalog titles.
+- [x] Verify the seed is duplicate-safe, correctly ordered, platform-labeled, and free of no-funds fields.
+- [x] Verify the populated public request board displays the seeded catalog and request actions.
+
+- [x] Make the authenticated AlmostLegitTV owner profile the default public example without inventing missing identity details.
+- [x] Preserve the creator-application prompt alongside the owner profile and populated story catalog.
+- [x] Verify duplicate-safe owner bootstrap, public request actions, privacy boundaries, and required sign-in prerequisite.

@@ -30,8 +30,17 @@ export async function upsertUserFromOAuth(input: { openId: string; name?: string
 export async function ensureOwnerProfile(userId: number, displayName: string) {
   if (!db) throw new Error("Database is not configured");
   const existing = await db.select().from(streamerProfiles).where(eq(streamerProfiles.ownerUserId, userId)).limit(1);
-  const profile = existing[0] ?? (await db.insert(streamerProfiles).values({ ownerUserId: userId, slug: "almostlegittv", displayName: displayName || "AlmostLegitTV", approvalStatus: "approved" }).then(async (result) => (await db.select().from(streamerProfiles).where(eq(streamerProfiles.id, Number(result[0].insertId))).limit(1))[0]));
+  const ownerBio = "Story-driven stream requests for the next chapter. The streamer reviews every request and decides what fits the schedule.";
+  const ownerLinks = JSON.stringify([
+    { platform: "TikTok", url: "https://www.tiktok.com/@almostlegittv" },
+    { platform: "YouTube", url: "https://youtube.com/@almostlegittv" },
+    { platform: "Kick", url: "https://kick.com/almostlegittv" },
+    { platform: "Twitch", url: "https://m.twitch.tv/almostlegittv/home" },
+    { platform: "Links", url: "https://lnk.bio/almostlegittv" },
+  ]);
+  const profile = existing[0] ?? (await db.insert(streamerProfiles).values({ ownerUserId: userId, slug: "almostlegittv", displayName: displayName || "AlmostLegitTV", bio: ownerBio, approvalStatus: "approved", gamerTags: JSON.stringify([]), streamLinks: ownerLinks, verifiedAt: new Date(), verifiedByUserId: userId }).then(async (result) => (await db.select().from(streamerProfiles).where(eq(streamerProfiles.id, Number(result[0].insertId))).limit(1))[0]));
   if (!profile) throw new Error("Unable to create owner profile");
+  if (!profile.streamLinks) await db.update(streamerProfiles).set({ bio: profile.bio || ownerBio, streamLinks: ownerLinks, gamerTags: profile.gamerTags || JSON.stringify([]), approvalStatus: "approved", verifiedAt: profile.verifiedAt || new Date(), verifiedByUserId: profile.verifiedByUserId || userId }).where(eq(streamerProfiles.id, profile.id));
   const seedGames = [
     { title: "Red Dead Redemption 2", platform: "xbox" as const, genre: "Story-driven western", note: "A long-form frontier story with room for chat to shape the journey." },
     { title: "Kingdom Come: Deliverance II", platform: "xbox" as const, genre: "Story-driven RPG", note: "A grounded medieval journey where choices shape the road ahead." },
