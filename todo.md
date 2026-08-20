@@ -208,3 +208,8 @@
 - [x] Remove the invalid `nodejs22.x` Vercel function runtime declaration.
 - [x] Validate the corrected Vercel configuration and serverless API build.
 - [x] Push the fix and confirm the mobile redeploy path.
+
+- [x] Diagnose Vercel `ERR_MODULE_NOT_FOUND` in the deployed `/api/trpc` function.
+- [x] Fix the Vercel serverless entrypoint or missing module reference.
+- [x] Re-run checks, tests, and production build after the runtime fix.
+- [ ] Push the Vercel runtime fix to `main` and verify the API response.
