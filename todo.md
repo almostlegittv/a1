@@ -217,3 +217,11 @@
 - [x] Fix Vercel’s incorrect `npm install --legacy-peer-deps` Install Command.
 - [x] Validate dependency installation and the production build with the repository’s pnpm configuration.
 - [ ] Push the install-command deployment fix and provide the correct Vercel redeploy action.
+
+- [x] Run live performance checks against the current Vercel deployment.
+- [x] Test the public catalog, search/filter/sort, platform switching, request-flow guardrails, creator application route, and production API.
+- [x] Record live stability findings and classify expected states versus actionable errors.
+
+- [x] Inspect the production seeding helpers, schema, and deployment environment requirements.
+- [x] Design a duplicate-safe production seed procedure for the owner profile and four story titles.
+- [x] Document the exact Vercel/MySQL steps and verification queries without exposing credentials.
