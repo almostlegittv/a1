@@ -213,3 +213,7 @@
 - [x] Fix the Vercel serverless entrypoint or missing module reference.
 - [x] Re-run checks, tests, and production build after the runtime fix.
 - [ ] Push the Vercel runtime fix to `main` and verify the API response.
+
+- [x] Fix Vercel’s incorrect `npm install --legacy-peer-deps` Install Command.
+- [x] Validate dependency installation and the production build with the repository’s pnpm configuration.
+- [ ] Push the install-command deployment fix and provide the correct Vercel redeploy action.
