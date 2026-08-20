@@ -160,3 +160,7 @@
 - [x] Refine the creator profile application form information architecture and field guidance.
 - [x] Improve client-side validation, dynamic rows, submission states, and status feedback.
 - [x] Verify authentication gating, responsive layout, privacy wording, and no-funds disclosure for the form workflow.
+
+- [x] Add admin review queue filters and summary metrics for creator applications.
+- [x] Improve application cards with verification progress, safer approval affordances, notes, and audit history.
+- [x] Verify admin-only rendering, review actions, responsive layout, and public-visibility boundaries.
