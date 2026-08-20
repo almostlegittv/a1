@@ -22,10 +22,10 @@ import {
 } from "lucide-react";
 
 const ASSETS = {
-  hero: "/manus-storage/almostlegit-hero-broadcast_1006acdc.jpg",
-  western: "/manus-storage/almostlegit-game-western_53b572bc.jpg",
-  survival: "/manus-storage/almostlegit-game-survival_90387eae.jpg",
-  mark: "/manus-storage/almostlegit-al-mark_9937e781.png",
+  hero: "/assets/almostlegit-hero-broadcast.jpg",
+  western: "/assets/almostlegit-game-western.jpg",
+  survival: "/assets/almostlegit-game-survival.jpg",
+  mark: "/assets/almostlegit-al-mark.png",
 };
 
 const SOCIALS = {

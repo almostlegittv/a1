@@ -110,3 +110,9 @@
 - [x] Parameterize the public booking board by approved creator slug instead of hard-coding AlmostLegitTV.
 - [x] Add a public creator route or selection escape route so approved creators can expose separate catalogs.
 - [x] Verify multi-creator routing preserves sorting, ownership, privacy, duplicate prevention, and no-funds behavior.
+
+- [x] Diagnose missing image assets in the Vercel deployment.
+- [x] Repair image packaging or URL references and verify production loading.
+
+- [ ] Redeploy the bundled `/assets` image fix to Vercel and verify the live homepage, favicon, hero, game art, and PayPal QR.
+- [ ] Capture desktop and mobile browser verification for the deployed image fix.
