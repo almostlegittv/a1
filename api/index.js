@@ -137,6 +137,20 @@ var creatorApplicationEvents = mysqlTable("creator_application_events", {
   applicationFk: foreignKey({ columns: [table.applicationId], foreignColumns: [creatorApplications.id], name: "creator_application_events_application_fk" }),
   actorUserFk: foreignKey({ columns: [table.actorUserId], foreignColumns: [users.id], name: "creator_application_events_actor_user_fk" })
 }));
+var gameSuggestions = mysqlTable("game_suggestions", {
+  id: int("id").autoincrement().primaryKey(),
+  streamerProfileId: int("streamerProfileId").notNull(),
+  submittedByUserId: int("submittedByUserId").notNull(),
+  title: varchar("title", { length: 180 }).notNull(),
+  platform: mysqlEnum("platform", ["xbox", "playstation"]).notNull(),
+  note: text("note"),
+  status: mysqlEnum("status", ["pending", "reviewed", "accepted", "declined"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
+}, (table) => ({
+  streamerProfileFk: foreignKey({ columns: [table.streamerProfileId], foreignColumns: [streamerProfiles.id], name: "game_suggestions_profile_fk" }),
+  submittedByUserFk: foreignKey({ columns: [table.submittedByUserId], foreignColumns: [users.id], name: "game_suggestions_submitter_fk" })
+}));
 var bookingRequests = mysqlTable("booking_requests", {
   id: int("id").autoincrement().primaryKey(),
   streamerProfileId: int("streamerProfileId").notNull(),
@@ -252,6 +266,7 @@ async function listApprovedCatalog(streamerProfileId) {
   if (!db) return [];
   return db.select({
     id: catalogGames.id,
+    catalogEntryId: streamerCatalog.id,
     title: catalogGames.title,
     platform: catalogGames.platform,
     genre: catalogGames.genre,
@@ -278,6 +293,25 @@ async function listCreatorRequests(streamerProfileId) {
   if (!db) return [];
   return db.select().from(bookingRequests).where(eq(bookingRequests.streamerProfileId, streamerProfileId)).orderBy(desc(bookingRequests.createdAt));
 }
+async function createGameSuggestion(input) {
+  if (!db) throw new Error("Database is not configured");
+  const title = input.title.trim();
+  const existing = await db.select().from(gameSuggestions).where(and(eq(gameSuggestions.streamerProfileId, input.streamerProfileId), eq(gameSuggestions.title, title), eq(gameSuggestions.platform, input.platform), inArray(gameSuggestions.status, ["pending", "reviewed", "accepted"]))).limit(1);
+  if (existing[0]) return { created: false, suggestion: existing[0] };
+  const result = await db.insert(gameSuggestions).values({ ...input, title, note: input.note?.trim() || null });
+  const rows = await db.select().from(gameSuggestions).where(eq(gameSuggestions.id, Number(result[0].insertId))).limit(1);
+  return { created: true, suggestion: rows[0] };
+}
+async function listGameSuggestions(streamerProfileId) {
+  if (!db) return [];
+  return db.select().from(gameSuggestions).where(eq(gameSuggestions.streamerProfileId, streamerProfileId)).orderBy(desc(gameSuggestions.createdAt));
+}
+async function updateGameSuggestionStatus(id, status) {
+  if (!db) throw new Error("Database is not configured");
+  await db.update(gameSuggestions).set({ status }).where(eq(gameSuggestions.id, id));
+  const rows = await db.select().from(gameSuggestions).where(eq(gameSuggestions.id, id)).limit(1);
+  return rows[0];
+}
 async function findActiveRequest(streamerProfileId, gameId) {
   if (!db) return void 0;
   const rows = await db.select().from(bookingRequests).where(and(eq(bookingRequests.streamerProfileId, streamerProfileId), eq(bookingRequests.gameId, gameId), inArray(bookingRequests.status, ["requested", "reviewing", "owned", "support_pending", "scheduled"]))).limit(1);
@@ -288,6 +322,15 @@ async function getStreamerProfileBySlug(slug) {
   const rows = await db.select().from(streamerProfiles).where(and(eq(streamerProfiles.slug, slug), eq(streamerProfiles.approvalStatus, "approved"))).limit(1);
   return rows[0];
 }
+async function getStreamerProfileById(id) {
+  if (!db) return void 0;
+  return (await db.select().from(streamerProfiles).where(eq(streamerProfiles.id, id)).limit(1))[0];
+}
+async function updateStreamerProfile(input) {
+  if (!db) throw new Error("Database is not configured");
+  await db.update(streamerProfiles).set({ displayName: input.displayName.trim(), bio: input.bio?.trim() || null, gamerTags: input.gamerTags || null, streamLinks: input.streamLinks || null }).where(eq(streamerProfiles.id, input.id));
+  return getStreamerProfileById(input.id);
+}
 async function createBookingRequest(input) {
   if (!db) throw new Error("Database is not configured");
   const existing = await findActiveRequest(input.streamerProfileId, input.gameId);
@@ -297,16 +340,16 @@ async function createBookingRequest(input) {
   const rows = await db.select().from(bookingRequests).where(eq(bookingRequests.id, requestId)).limit(1);
   return { created: true, request: rows[0] };
 }
-async function updateRequestStatus(id, status) {
+async function updateRequestStatus(input) {
   if (!db) throw new Error("Database is not configured");
-  await db.update(bookingRequests).set({ status }).where(eq(bookingRequests.id, id));
-  const rows = await db.select().from(bookingRequests).where(eq(bookingRequests.id, id)).limit(1);
+  await db.update(bookingRequests).set({ status: input.status }).where(and(eq(bookingRequests.id, input.id), eq(bookingRequests.streamerProfileId, input.streamerProfileId)));
+  const rows = await db.select().from(bookingRequests).where(and(eq(bookingRequests.id, input.id), eq(bookingRequests.streamerProfileId, input.streamerProfileId))).limit(1);
   return rows[0];
 }
-async function setCatalogOwnership(id, ownershipStatus) {
+async function setCatalogOwnership(input) {
   if (!db) throw new Error("Database is not configured");
-  await db.update(streamerCatalog).set({ ownershipStatus }).where(eq(streamerCatalog.id, id));
-  const rows = await db.select().from(streamerCatalog).where(eq(streamerCatalog.id, id)).limit(1);
+  await db.update(streamerCatalog).set({ ownershipStatus: input.ownershipStatus }).where(and(eq(streamerCatalog.id, input.id), eq(streamerCatalog.streamerProfileId, input.streamerProfileId)));
+  const rows = await db.select().from(streamerCatalog).where(and(eq(streamerCatalog.id, input.id), eq(streamerCatalog.streamerProfileId, input.streamerProfileId))).limit(1);
   return rows[0];
 }
 async function listUsersForAdminOnboarding() {
@@ -537,9 +580,26 @@ var appRouter = t.router({
       if (ctx.user?.role !== "admin" && ctx.user?.streamerProfileId !== input.streamerProfileId) throw new TRPCError({ code: "FORBIDDEN" });
       return listCreatorRequests(input.streamerProfileId);
     }),
-    classifyRequest: creatorProcedure.input(z.object({ id: z.number().int().positive(), status: requestStatus })).mutation(({ input }) => updateRequestStatus(input.id, input.status)),
-    setOwnership: creatorProcedure.input(z.object({ id: z.number().int().positive(), ownershipStatus: z.enum(["unconfirmed", "owned"]) })).mutation(({ input }) => setCatalogOwnership(input.id, input.ownershipStatus)),
-    activeRequest: publicProcedure.input(z.object({ streamerProfileId: z.number().int().positive(), gameId: z.number().int().positive() })).query(({ input }) => findActiveRequest(input.streamerProfileId, input.gameId))
+    classifyRequest: creatorProcedure.input(z.object({ id: z.number().int().positive(), streamerProfileId: z.number().int().positive(), status: requestStatus })).mutation(({ ctx, input }) => {
+      if (ctx.user?.role !== "admin" && ctx.user?.streamerProfileId !== input.streamerProfileId) throw new TRPCError({ code: "FORBIDDEN" });
+      return updateRequestStatus(input);
+    }),
+    setOwnership: creatorProcedure.input(z.object({ id: z.number().int().positive(), streamerProfileId: z.number().int().positive(), ownershipStatus: z.enum(["unconfirmed", "owned"]) })).mutation(({ ctx, input }) => {
+      if (ctx.user?.role !== "admin" && ctx.user?.streamerProfileId !== input.streamerProfileId) throw new TRPCError({ code: "FORBIDDEN" });
+      return setCatalogOwnership(input);
+    }),
+    activeRequest: publicProcedure.input(z.object({ streamerProfileId: z.number().int().positive(), gameId: z.number().int().positive() })).query(({ input }) => findActiveRequest(input.streamerProfileId, input.gameId)),
+    myProfile: creatorProcedure.query(({ ctx }) => ctx.user?.streamerProfileId ? getStreamerProfileById(ctx.user.streamerProfileId) : void 0),
+    updateProfile: creatorProcedure.input(z.object({ id: z.number().int().positive(), displayName: z.string().trim().min(2).max(160), bio: z.string().trim().max(2e3).optional(), gamerTags: z.string().max(2e3).optional(), streamLinks: z.string().max(2e3).optional() })).mutation(({ ctx, input }) => {
+      if (ctx.user?.role !== "admin" && ctx.user?.streamerProfileId !== input.id) throw new TRPCError({ code: "FORBIDDEN" });
+      return updateStreamerProfile(input);
+    }),
+    suggestGame: protectedProcedure.input(z.object({ streamerProfileId: z.number().int().positive(), title: z.string().trim().min(2).max(180), platform: z.enum(["xbox", "playstation"]), note: z.string().trim().max(1e3).optional() })).mutation(({ ctx, input }) => createGameSuggestion({ ...input, submittedByUserId: ctx.user.id })),
+    creatorSuggestions: creatorProcedure.input(z.object({ streamerProfileId: z.number().int().positive() })).query(({ ctx, input }) => {
+      if (ctx.user?.role !== "admin" && ctx.user?.streamerProfileId !== input.streamerProfileId) throw new TRPCError({ code: "FORBIDDEN" });
+      return listGameSuggestions(input.streamerProfileId);
+    }),
+    updateSuggestion: creatorProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(["pending", "reviewed", "accepted", "declined"]) })).mutation(({ input }) => updateGameSuggestionStatus(input.id, input.status))
   })
 });
 

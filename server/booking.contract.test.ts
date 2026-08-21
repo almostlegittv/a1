@@ -9,6 +9,8 @@ describe("booking contract", () => {
     expect(appRouter._def.procedures["booking.createRequest"]).toBeDefined();
     expect(appRouter._def.procedures["booking.suggestGame"]).toBeDefined();
     expect(appRouter._def.procedures["booking.creatorSuggestions"]).toBeDefined();
+    expect(appRouter._def.procedures["booking.myProfile"]).toBeDefined();
+    expect(appRouter._def.procedures["booking.updateProfile"]).toBeDefined();
   });
 
   it("requires an authenticated user to create a booking request", async () => {
@@ -24,6 +26,11 @@ describe("booking contract", () => {
   it("requires an authenticated user to suggest a game", async () => {
     const caller = appRouter.createCaller({ user: null });
     await expect(caller.booking.suggestGame({ streamerProfileId: 1, title: "A new story", platform: "xbox" })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+  });
+
+  it("requires creator authorization to edit a profile", async () => {
+    const caller = appRouter.createCaller({ user: null });
+    await expect(caller.booking.updateProfile({ id: 1, displayName: "Test Creator" })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 
   it("contains no on-site money, payment, wallet, code, or fee fields", () => {

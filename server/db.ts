@@ -74,6 +74,7 @@ export async function listApprovedCatalog(streamerProfileId: number) {
   return db
     .select({
       id: catalogGames.id,
+      catalogEntryId: streamerCatalog.id,
       title: catalogGames.title,
       platform: catalogGames.platform,
       genre: catalogGames.genre,
@@ -155,6 +156,17 @@ export async function getStreamerProfileBySlug(slug: string) {
   return rows[0];
 }
 
+export async function getStreamerProfileById(id: number) {
+  if (!db) return undefined;
+  return (await db.select().from(streamerProfiles).where(eq(streamerProfiles.id, id)).limit(1))[0];
+}
+
+export async function updateStreamerProfile(input: { id: number; displayName: string; bio?: string; gamerTags?: string; streamLinks?: string }) {
+  if (!db) throw new Error("Database is not configured");
+  await db.update(streamerProfiles).set({ displayName: input.displayName.trim(), bio: input.bio?.trim() || null, gamerTags: input.gamerTags || null, streamLinks: input.streamLinks || null }).where(eq(streamerProfiles.id, input.id));
+  return getStreamerProfileById(input.id);
+}
+
 export async function createBookingRequest(input: { streamerProfileId: number; gameId: number; viewerUserId?: number; viewerHandle: string; viewerPlatform: string; publicNote?: string }) {
   if (!db) throw new Error("Database is not configured");
   const existing = await findActiveRequest(input.streamerProfileId, input.gameId);
@@ -165,17 +177,17 @@ export async function createBookingRequest(input: { streamerProfileId: number; g
   return { created: true as const, request: rows[0] };
 }
 
-export async function updateRequestStatus(id: number, status: "requested" | "reviewing" | "owned" | "support_pending" | "scheduled" | "completed" | "cancelled") {
+export async function updateRequestStatus(input: { id: number; streamerProfileId: number; status: "requested" | "reviewing" | "owned" | "support_pending" | "scheduled" | "completed" | "cancelled" }) {
   if (!db) throw new Error("Database is not configured");
-  await db.update(bookingRequests).set({ status }).where(eq(bookingRequests.id, id));
-  const rows = await db.select().from(bookingRequests).where(eq(bookingRequests.id, id)).limit(1);
+  await db.update(bookingRequests).set({ status: input.status }).where(and(eq(bookingRequests.id, input.id), eq(bookingRequests.streamerProfileId, input.streamerProfileId)));
+  const rows = await db.select().from(bookingRequests).where(and(eq(bookingRequests.id, input.id), eq(bookingRequests.streamerProfileId, input.streamerProfileId))).limit(1);
   return rows[0];
 }
 
-export async function setCatalogOwnership(id: number, ownershipStatus: "unconfirmed" | "owned") {
+export async function setCatalogOwnership(input: { id: number; streamerProfileId: number; ownershipStatus: "unconfirmed" | "owned" }) {
   if (!db) throw new Error("Database is not configured");
-  await db.update(streamerCatalog).set({ ownershipStatus }).where(eq(streamerCatalog.id, id));
-  const rows = await db.select().from(streamerCatalog).where(eq(streamerCatalog.id, id)).limit(1);
+  await db.update(streamerCatalog).set({ ownershipStatus: input.ownershipStatus }).where(and(eq(streamerCatalog.id, input.id), eq(streamerCatalog.streamerProfileId, input.streamerProfileId)));
+  const rows = await db.select().from(streamerCatalog).where(and(eq(streamerCatalog.id, input.id), eq(streamerCatalog.streamerProfileId, input.streamerProfileId))).limit(1);
   return rows[0];
 }
 

@@ -230,3 +230,14 @@
 - [x] Add protected/public procedures for submitting and reviewing game suggestions.
 - [x] Add a prominent Request a Game button and accessible suggestion form to the catalog page.
 - [x] Add creator/admin visibility for submitted suggestions and test the complete flow.
+
+## Priority completion pass
+
+- [x] Priority 1: Finish creator profiles, profile editing, approval visibility, and creator-specific catalog identity.
+- [x] Priority 2: Finish creator application submission, admin review, verification, approval, rejection, and onboarding handoff.
+- [x] Priority 3: Finish authenticated booking requests, duplicate prevention, public status, and creator review transitions.
+- [x] Priority 4: Finish ownership and availability logic across catalog, requests, and creator controls.
+- [x] Priority 5: Finish the creator dashboard with profile, catalog, suggestion, and booking management.
+- [x] Priority 6: Finish the admin dashboard with creator/application oversight and role-safe actions.
+- [x] Priority 7: Add safe fake/test-user fixtures and verify the complete journey from application through booking and review.
+- [x] Run the full test, build, migration, and visual verification pass for the seven-priority release.

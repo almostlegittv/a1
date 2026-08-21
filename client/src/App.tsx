@@ -11,6 +11,7 @@ import CreatorManagement from "@/pages/CreatorManagement";
 import AdminCreatorOnboarding from "./pages/AdminCreatorOnboarding";
 import CreatorApplication from "./pages/CreatorApplication";
 import AdminCreatorApplications from "./pages/AdminCreatorApplications";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/booking" component={BookingDashboard} />
       <Route path="/booking/:creatorSlug" component={BookingDashboard} />
       <Route path="/creator" component={CreatorManagement} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/onboard" component={AdminCreatorOnboarding} />
       <Route path="/apply/creator" component={CreatorApplication} />
       <Route path="/admin/applications" component={AdminCreatorApplications} />

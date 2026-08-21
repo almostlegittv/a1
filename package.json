@@ -10,7 +10,8 @@
     "preview": "vite preview --host",
     "check": "tsc --noEmit",
     "test": "vitest run",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:fixtures": "ALLOW_TEST_FIXTURES=true NODE_ENV=development node scripts/seed-test-users.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
