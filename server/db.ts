@@ -1,10 +1,12 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
+import { getMysqlConnectionConfig } from "./mysql-config";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { bookingRequests, catalogGames, creatorApplicationChecks, creatorApplicationEvents, creatorApplications, gameSuggestions, streamerCatalog, streamerProfiles, users } from "../drizzle/schema";
 import { validateGamerTag, validatePublicStreamLink } from "../shared/identityValidation";
 
-const pool = process.env.DATABASE_URL ? mysql.createPool(process.env.DATABASE_URL) : null;
+const mysqlConfig = getMysqlConnectionConfig();
+const pool = mysqlConfig ? mysql.createPool(mysqlConfig) : null;
 export const db = pool ? drizzle(pool) : null;
 
 export async function getUserByOpenId(openId: string) {
