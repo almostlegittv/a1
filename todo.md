@@ -242,6 +242,6 @@
 - [x] Priority 7: Add safe fake/test-user fixtures and verify the complete journey from application through booking and review.
 - [x] Run the full test, build, migration, and visual verification pass for the seven-priority release.
 
-- [ ] Fix TiDB mysql2 TLS handling for the unsupported `ssl={"rejectUnauthorized":true}` URL profile.
-- [ ] Validate migration and runtime database connections with the corrected TLS configuration.
-- [ ] Push the TLS compatibility fix and update the Vercel DATABASE_URL instructions.
+- [x] Fix TiDB mysql2 TLS handling for the unsupported `ssl={"rejectUnauthorized":true}` URL profile.
+- [x] Validate migration and runtime database connections with the corrected TLS configuration.
+- [x] Push the TLS compatibility fix and update the Vercel DATABASE_URL instructions.
