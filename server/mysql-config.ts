@@ -1,9 +1,10 @@
 import type { ConnectionOptions } from "mysql2";
 
-export function getMysqlConnectionConfig(url = process.env.DATABASE_URL): ConnectionOptions | null {
-  if (!url) return null;
+export function getMysqlConnectionConfig(url?: string | null): ConnectionOptions | null {
+  const connectionUrl = url === undefined ? process.env.DATABASE_URL : url;
+  if (!connectionUrl) return null;
 
-  const parsed = new URL(url);
+  const parsed = new URL(connectionUrl);
   const database = decodeURIComponent(parsed.pathname.replace(/^\//, ""));
   const isTiDbCloud = parsed.hostname.endsWith(".tidbcloud.com");
 

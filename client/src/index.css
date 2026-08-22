@@ -363,6 +363,14 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .booking-card-action:hover { transform: translateY(-2px); background: #e2ffad; }
 .booking-card-action--muted { color: var(--platform-accent); background: transparent; }
 .booking-card-action--muted:hover { color: #11130e; background: var(--platform-accent); }
+.booking-how-it-works { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.35fr); gap: 2rem; margin: 2rem 0 2.4rem; padding: 1.35rem; border: 1px solid var(--platform-border); background: linear-gradient(110deg, rgba(24,28,22,.96), rgba(17,19,16,.88)); }
+.booking-how-it-works__heading h2 { max-width: 14ch; margin: .45rem 0 .7rem; font-family: "Space Grotesk", sans-serif; font-size: clamp(1.55rem, 3.5vw, 2.6rem); line-height: .98; letter-spacing: -.06em; }
+.booking-how-it-works__heading > p:last-child { max-width: 34rem; margin: 0; color: #aeb7a8; font-size: .78rem; line-height: 1.5; }
+.booking-how-it-works__steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; }
+.booking-how-step { min-width: 0; padding: .9rem; border-top: 2px solid var(--platform-accent); background: rgba(12,14,12,.62); }
+.booking-how-step > span { color: var(--platform-accent); font-family: "Space Grotesk", sans-serif; font-size: .65rem; font-weight: 800; letter-spacing: .1em; }
+.booking-how-step h3 { margin: 1.15rem 0 .45rem; font-family: "Space Grotesk", sans-serif; font-size: 1rem; letter-spacing: -.035em; }
+.booking-how-step p { margin: 0; color: #aeb7a8; font-size: .72rem; line-height: 1.5; }
 .booking-queue { min-width: 0; }
 .booking-privacy { display: flex; align-items: center; gap: .45rem; margin: 0 0 1rem; color: #929a8f; font-size: .71rem; }
 .booking-privacy svg { color: var(--platform-accent); }
@@ -399,7 +407,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .booking-modal__hint svg { flex: none; color: var(--platform-accent); }
 .booking-modal__submit { width: 100%; margin-top: 1.25rem; }
 @media (max-width: 900px) { .booking-header { align-items: flex-start; flex-direction: column; } .booking-creator-card { width: 100%; } .booking-grid { grid-template-columns: 1fr; } .booking-queue { max-width: none; } }
-@media (max-width: 620px) { .booking-page { padding-right: 1rem; padding-left: 1rem; } .booking-header { padding-top: 2rem; } .booking-header h1 { font-size: clamp(2.8rem, 15vw, 4.3rem); } .booking-lede { font-size: .88rem; } .platform-switcher__label { width: 100%; margin: 0 0 .25rem; } .platform-switcher__active { width: 100%; margin: .45rem 0 0; } .booking-game-grid { grid-template-columns: 1fr; } .booking-section-heading { align-items: start; flex-direction: column; gap: .4rem; } .booking-private-row { align-items: flex-start; flex-direction: column; gap: .25rem; } }
+@media (max-width: 620px) { .booking-how-it-works { grid-template-columns: 1fr; gap: 1.25rem; margin-top: 1.4rem; padding: 1rem; } .booking-how-it-works__heading h2 { max-width: 18ch; } .booking-how-it-works__steps { grid-template-columns: 1fr; } .booking-how-step { display: grid; grid-template-columns: 2.1rem 1fr; gap: .7rem; } .booking-how-step h3 { margin-top: 0; } .booking-page { padding-right: 1rem; padding-left: 1rem; } .booking-header { padding-top: 2rem; } .booking-header h1 { font-size: clamp(2.8rem, 15vw, 4.3rem); } .booking-lede { font-size: .88rem; } .platform-switcher__label { width: 100%; margin: 0 0 .25rem; } .platform-switcher__active { width: 100%; margin: .45rem 0 0; } .booking-game-grid { grid-template-columns: 1fr; } .booking-section-heading { align-items: start; flex-direction: column; gap: .4rem; } .booking-private-row { align-items: flex-start; flex-direction: column; gap: .25rem; } }
 
 .booking-catalog-tools { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; margin: 1.55rem 0 1.15rem; }
 .booking-search { display: flex; align-items: center; gap: .55rem; flex: 1 1 240px; min-height: 43px; padding: 0 .85rem; border: 1px solid rgba(244,243,235,.18); background: #171a15; color: var(--signal); }

@@ -168,6 +168,15 @@ export default function BookingDashboard() {
 
       {notice && <div className="booking-notice" role="status"><Check size={17} /> <span>{notice}</span><button type="button" onClick={() => setNotice("")} aria-label="Dismiss notice"><X size={16} /></button></div>}
 
+      <section className="booking-how-it-works" aria-labelledby="booking-how-heading">
+        <div className="booking-how-it-works__heading"><p className="eyebrow">HOW IT WORKS</p><h2 id="booking-how-heading">Three moves from idea to stream request.</h2><p>Keep it simple: choose a title, send the request, and let the creator decide what fits.</p></div>
+        <div className="booking-how-it-works__steps">
+          <article className="booking-how-step"><span>01</span><div><h3>Choose a title</h3><p>Browse the approved catalog or suggest a game that belongs on the board.</p></div></article>
+          <article className="booking-how-step"><span>02</span><div><h3>Request a stream</h3><p>Sign in and share the streaming username the creator should recognize. Your identity stays private.</p></div></article>
+          <article className="booking-how-step"><span>03</span><div><h3>The creator reviews</h3><p>Ownership, timing, and fit stay with the creator. A request is not a purchase, payment, contract, or guarantee.</p></div></article>
+        </div>
+      </section>
+
       <div className="booking-grid">
         <section className="booking-catalog" aria-labelledby="catalog-heading">
           <div className="booking-section-heading"><div><p className="eyebrow">CREATOR CATALOG</p><h2 id="catalog-heading">Request a stream.</h2><p className="booking-section-intro">Start with the story-driven picks below, or search the creator’s full approved catalog.</p></div><div className="booking-heading-actions"><span className="booking-count">{visibleGames.length} of {boardGames.length} titles</span><button type="button" className="booking-suggest-button" onClick={() => setShowSuggestion(true)}><Lightbulb size={15} /> Request a Game</button></div></div>

@@ -245,3 +245,6 @@
 - [x] Fix TiDB mysql2 TLS handling for the unsupported `ssl={"rejectUnauthorized":true}` URL profile.
 - [x] Validate migration and runtime database connections with the corrected TLS configuration.
 - [x] Push the TLS compatibility fix and update the Vercel DATABASE_URL instructions.
+
+- [x] Add a visible three-step How it works section to the booking-first landing page explaining choose, request, and creator review.
+- [x] Validate the section’s no-funds wording and responsive presentation.

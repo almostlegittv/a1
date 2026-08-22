@@ -15,6 +15,6 @@ describe("TiDB MySQL connection config", () => {
   });
 
   it("returns no connection config when DATABASE_URL is unavailable", () => {
-    expect(getMysqlConnectionConfig(undefined)).toBeNull();
+    expect(getMysqlConnectionConfig(null)).toBeNull();
   });
 });
