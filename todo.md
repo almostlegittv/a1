@@ -255,3 +255,7 @@
 
 - [x] Add an always-visible public sign-in/workspace control so visitors can start authentication without submitting a request.
 - [x] Validate the sign-in control integration with TypeScript, tests, and production build.
+
+- [x] Recheck today’s committed creator, booking, TLS, sign-in, and How it works changes against the live deployment.
+- [x] Customize the authenticated creator workspace dashboard with clear Signal Raid hierarchy and workflow summaries.
+- [x] Validate creator/admin role boundaries and responsive dashboard presentation after customization.

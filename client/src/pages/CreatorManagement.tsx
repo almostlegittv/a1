@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Check, Lightbulb, Lock, Radio, ShieldAlert } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Lightbulb, Lock, Radio, ShieldAlert } from "lucide-react";
 import { Link } from "wouter";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -86,6 +86,12 @@ export default function CreatorManagement() {
         </section>
       ) : (
         <>
+          <section className="creator-workspace-overview" aria-labelledby="creator-overview-heading">
+            <div className="creator-workspace-overview__intro"><p className="eyebrow"><Radio size={14} /> CREATOR OPERATIONS</p><h2 id="creator-overview-heading">Your control room.</h2><p>Keep the public board clear, confirm what you own, and move each request toward a realistic stream decision.</p></div>
+            <div className="creator-workspace-overview__metrics"><div><span>INCOMING</span><strong>{requests.data?.length ?? 0}</strong><small>private requests</small></div><div><span>CATALOG</span><strong>{catalog.data?.length ?? 0}</strong><small>approved titles</small></div><div><span>IDEAS</span><strong>{suggestions.data?.length ?? 0}</strong><small>viewer suggestions</small></div></div>
+            <div className="creator-workspace-overview__actions"><Link href="/booking" className="signal-button signal-button--primary">View public board <ArrowLeft size={15} className="creator-workspace-overview__forward" /></Link><Link href="/apply/creator" className="creator-workspace-link">Review creator application path <ChevronRight size={15} /></Link></div>
+          </section>
+
           <section className="creator-profile-workspace" aria-labelledby="creator-profile-heading">
             <div className="booking-section-heading"><div><p className="eyebrow"><Radio size={14} /> PUBLIC PROFILE</p><h2 id="creator-profile-heading">Your creator profile.</h2></div><span className="booking-count">/{profile.data?.slug ?? "creator"}</span></div>
             <p className="booking-privacy"><Lock size={14} /> These fields are visible on the approved public portfolio. Do not enter passwords or platform credentials.</p>

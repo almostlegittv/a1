@@ -461,7 +461,23 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .signal-button--ghost { min-height: 36px; padding: .55rem .75rem; color: var(--signal); background: transparent; border-color: rgba(184,255,44,.42); }
 .signal-button--ghost:hover { color: var(--graphite); background: var(--signal); }
 .creator-request-row__status select { min-width: 150px; padding: .48rem .55rem; color: var(--bone); background: #11130f; border: 1px solid rgba(244,243,235,.18); font: 600 .68rem "Space Grotesk", sans-serif; text-transform: uppercase; }
+.creator-workspace-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 1.2rem; margin: 1.6rem 0 2rem; padding: 1.25rem; border: 1px solid var(--platform-border); background: linear-gradient(120deg, rgba(26,30,24,.95), rgba(17,19,16,.88)); }
+.creator-workspace-overview__intro h2 { margin: .35rem 0 .6rem; font-family: "Space Grotesk", sans-serif; font-size: clamp(1.75rem, 4vw, 3rem); letter-spacing: -.07em; }
+.creator-workspace-overview__intro > p:last-child { max-width: 34rem; margin: 0; color: #b8c0b4; font-size: .78rem; line-height: 1.55; }
+.creator-workspace-overview__metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
+.creator-workspace-overview__metrics > div { display: flex; min-height: 105px; flex-direction: column; justify-content: space-between; padding: .75rem; border-left: 2px solid var(--platform-accent); background: rgba(10,12,10,.56); }
+.creator-workspace-overview__metrics span { color: var(--platform-accent); font: 700 .58rem "Space Grotesk", sans-serif; letter-spacing: .12em; }
+.creator-workspace-overview__metrics strong { color: var(--bone); font: 700 2rem "Space Grotesk", sans-serif; letter-spacing: -.08em; }
+.creator-workspace-overview__metrics small { color: #8f988b; font-size: .68rem; }
+.creator-workspace-overview__actions { grid-column: 1 / -1; display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; padding-top: .85rem; border-top: 1px solid var(--border); }
+.creator-workspace-overview__forward { transform: rotate(180deg); }
+.creator-workspace-link { display: inline-flex; align-items: center; gap: .3rem; color: var(--platform-accent); font: 700 .67rem "Space Grotesk", sans-serif; text-decoration: none; }
+.creator-workspace-link:hover { color: var(--bone); }
+
 @media (max-width: 680px) {
+  .creator-workspace-overview { grid-template-columns: 1fr; }
+  .creator-workspace-overview__actions { align-items: stretch; flex-direction: column; }
+  .creator-workspace-overview__actions .signal-button, .creator-workspace-link { justify-content: center; width: 100%; }
   .admin-onboarding-grid { grid-template-columns: 1fr; }
   .admin-onboarding-wide { grid-column: auto; }
   .admin-link-notice { align-items: flex-start; flex-wrap: wrap; }
