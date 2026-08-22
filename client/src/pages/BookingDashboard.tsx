@@ -153,7 +153,10 @@ export default function BookingDashboard() {
           <div className="booking-avatar">AL</div>
           <div><strong>{profile.data?.displayName ?? creatorSlug}</strong><span><span className="live-dot" /> Approved creator</span></div>
         </div>
-        <Link href="/apply/creator" className="booking-creator-apply"><Users size={15} /> Are you a creator? Apply for a portfolio</Link>
+        <div className="booking-header__actions">
+          {auth.data ? <Link href={auth.data.role === "admin" ? "/admin" : "/creator"} className="booking-signin-button"><Check size={15} /> Open workspace</Link> : <button type="button" className="booking-signin-button" onClick={() => startLogin()}><Lock size={15} /> Sign in to request</button>}
+          <Link href="/apply/creator" className="booking-creator-apply"><Users size={15} /> Are you a creator? Apply for a portfolio</Link>
+        </div>
       </header>
 
       <section className="platform-switcher" aria-label="Choose platform mode">

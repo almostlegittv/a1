@@ -248,3 +248,10 @@
 
 - [x] Add a visible three-step How it works section to the booking-first landing page explaining choose, request, and creator review.
 - [x] Validate the section’s no-funds wording and responsive presentation.
+
+- [ ] Diagnose why production sign-in/sign-up is unavailable and why owner/admin access is not established.
+- [ ] Restore or document the required production OAuth callback and environment configuration.
+- [ ] Verify owner authentication and protected creator/admin access without automatic login.
+
+- [x] Add an always-visible public sign-in/workspace control so visitors can start authentication without submitting a request.
+- [x] Validate the sign-in control integration with TypeScript, tests, and production build.
